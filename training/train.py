@@ -59,7 +59,7 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 						q=q,
 						weight_key='weight')#, 
 						#workers=workers)
-		model.fit(window=window, min_count=1, seed=seed, alpha=learning_rate, batch_words=4)
+		model = model.fit(window=window, min_count=1, seed=seed, alpha=learning_rate, batch_words=4)
 		# embeddings = model.save()
 		model.wv.save_word2vec_format('./temp_embeddings_file.emb')
 		embeddings = node2vec_embedder('temp_embeddings_file.emb')
@@ -73,15 +73,20 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 
 def main(args):
 
-	df = pd.read_csv(args.directory+'/'+args.graph_file, header=None, names=['source', 'target', 'weight'])
-	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
+	# df = pd.read_csv(args.directory+'/'+args.graph_file, header=None, names=['source', 'target', 'weight'])
+	# G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
+	G = nx.complete_graph(100)
 	full_filepath, embedd_str = make_filepath(args)
 	os.mkdir(args.directory+'/'+full_filepath)
 
 	save_embeddings = True
-	if os.path.isdir(args.directory+'/'+embedd_str):
+	if not os.path.isdir(args.directory+'/embeddings'):
+		os.mkdir(args.directory+'/embeddings')
+
+	path.exists("guru99.txt")
+	if os.path.exists(args.directory+'/embeddings/'+embedd_str+'_embedding.json'):
 		save_embeddings = False
-		with open(args.directory+'/'+embedd_str+'/embedding_%s.json' % embedd_str, 'r') as fp:
+		with open(args.directory+'/embeddings/'+embedd_str+'_embedding.json', 'r') as fp:
 			embeddings = json.load(fp)
 		# embeddings = load(args.directory+'/'+embedd_str+'/embeddings.txt')
 	else:
@@ -100,8 +105,8 @@ def main(args):
 									workers=args.workers)
 
 	if save_embeddings:
-		os.mkdir(args.directory+'/'+embedd_str)
-		with open(args.directory+'/'+embedd_str+'/embedding_%s.json' % embedd_str, 'w') as fp:
+		# os.mkdir(args.directory+'/embeddings/'+embedd_str+'embedding.json')
+		with open(args.directory+'/embeddings'+embedd_str+'_embedding.json', 'w') as fp:
 			json.dump(embeddings, fp)
 	print(args.layers)
 
