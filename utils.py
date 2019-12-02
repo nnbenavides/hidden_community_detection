@@ -3,8 +3,11 @@ import numpy as np
 import networkx as nx
 from networkx.algorithms import community as nxcm
 import copy
+import pandas as pd
+import numpy as np
 import snap
 import community
+import random
 
 #layer is an array of subgraphs of G
 def layer_to_partition(layer,G):
@@ -38,11 +41,9 @@ def louvain(G):
     partition = community.best_partition(G)
     return partition
 
-
-def modularity(partition):
+def modularity(partition,G):
     modularity = community.modularity(partition, G)
     return modularity
-
 
 def plot_hist(partition,filename='community_hist.png'):
     communities_u = {}
@@ -56,11 +57,15 @@ def plot_hist(partition,filename='community_hist.png'):
 def communityGN(graph):
     communities_generator = nxcm.girvan_newman(graph)
     top_level_communities = next(communities_generator)
+    #next_level_communities = next(communities_generator)
     partitions = [list(c) for c in top_level_communities]
     layer = []
     for partition in partitions:
         subgraph = graph.subgraph(partition)
+        #print(list(subgraph.nodes))
+        #print(list(subgraph.edges))
         layer.append(subgraph)
+    # print(communities)
     return layer
 
 #Identification
@@ -89,7 +94,7 @@ def get_q_prime_k(subgraph,graph,layer):
     n_k = len(subgraph)
     n = len(graph)
     e_kk = subgraph.number_of_edges()
-    d_k = graph.degree(subgraph.nodes)
+    d_k = sum([d for n,d in graph.degree(subgraph.nodes)])
     p_k = 2*e_kk/(n_k*(n_k - 1))
     q_k = (d_k - 2*e_kk)/(n_k*(n - n_k))
     q_prime_k = q_k/p_k
@@ -116,13 +121,29 @@ def reduceEdge(graph,layer):
         edges_to_remove = [edge for edge in subgraph.edges if random.random() < q_prime_k]
         relaxed_graph.remove_edges_from(edges_to_remove)
     return relaxed_graph
-        
+
 
 def reduceWeight(graph,layer):
+    """
+    Take layer, a division of graph into communities, and 
+    weaken the communities within graph by reducing the 
+    weight of each edge within community C_k by a factor of
+    q'k = p_k/q_k
+    q_k = (d_k - 2e_kk)/(n_k(n-n_k)
+    p_k = e_kk/(0.5n_k*(n_k-1))
+    Where p_k is the observed edge probability of Community C_k
+    q_k is the background block probability
+    n_k is the number of nodes in C_k
+    d_k is the sum of degrees of nodes in C_k
+    e_kk is the number of edges in C_k
+    n is the total number of nodes in graph
+    reduce weight of 
+    """
     relaxed_graph = graph.copy()
     for subgraph in layer:
         q_prime_k = get_q_prime_k(subgraph,graph,layer)
-        for u, v, weight in G.edges.data('weight'):
+        for u, v, weight in relaxed_graph.edges.data('weight'):
+            #print(q_prime_k,relaxed_graph.edges[u, v]['weight'])
             relaxed_graph.edges[u, v]['weight'] *= q_prime_k
     return relaxed_graph
 
@@ -145,3 +166,19 @@ def refinement(layers,G):
         m = modularity(partition)
         output_layers.append(partition_to_layer(partition,G))
     return output_layers
+
+def hicode(G):
+    m = -1
+    G_curr = G.copy()
+    partition = louvain(G_curr)
+    layer = partition_to_layer(partition,G_curr)
+    new_m = modularity(partition,G_curr)
+    print("starting mod: ",new_m)
+    m = new_m
+    G_curr = reduceEdge(G_curr,layer)
+    print(G_curr)
+    partition = louvain(G_curr)
+    layer = partition_to_layer(partition,G_curr)
+    new_m = modularity(partition,G_curr)
+    print("iteration: ",new_m)
+    return m
