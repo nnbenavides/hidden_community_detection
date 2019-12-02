@@ -6,13 +6,43 @@ import copy
 import snap
 import community
 
+#layer is an array of subgraphs of G
+def layer_to_partition(layer,G):
+    partition = {}
+    for i,subgraph in enumerate(layer):
+        for node in list(subgraph.nodes):
+            partition[node] = i
+    return partition
+    
+    
+#partition is a dictionary of node:community mappings
+def partition_to_layer(partition,G):
+    max_value = max(partition.values())
+    nodes = [[] for v in range(max_value+1)]
+    for key,val in partition.items():
+        nodes[val].append(key)
+    layer = []
+    for nodelist in nodes:
+        layer.append(G.subgraph(nodelist))
+    return layer
+
+
+def loadGraphs():
+    df = pd.read_csv('reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
+    G_weighted = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
+    G = nx.read_edgelist('undirected_unweighted_union_reddit_edge_list.tsv')
+    return G, G_weighted
+
+
 def louvain(G):
     partition = community.best_partition(G)
     return partition
 
+
 def modularity(partition):
     modularity = community.modularity(partition, G)
     return modularity
+
 
 def plot_hist(partition,filename='community_hist.png'):
     communities_u = {}
@@ -55,7 +85,17 @@ def removeEdge(graph,layer):
         relaxed_graph.remove_edges_from(subgraph.edges)
     return relaxed_graph
 
-def reduceWeight(graph,layer):
+def get_q_prime_k(subgraph,graph,layer):
+    n_k = len(subgraph)
+    n = len(graph)
+    e_kk = subgraph.number_of_edges()
+    d_k = graph.degree(subgraph.nodes)
+    p_k = 2*e_kk/(n_k*(n_k - 1))
+    q_k = (d_k - 2*e_kk)/(n_k*(n - n_k))
+    q_prime_k = q_k/p_k
+    return q_prime_k
+
+def reduceEdge(graph,layer):
     """
     Take layer, a division of graph into communities, and 
     weaken the communities within graph by reducing the 
@@ -70,5 +110,38 @@ def reduceWeight(graph,layer):
     e_kk is the number of edges in C_k
     n is the total number of nodes in graph
     """
-    pass
+    relaxed_graph = graph.copy()
+    for subgraph in layer:
+        q_prime_k = get_q_prime_k(subgraph,graph,layer)
+        edges_to_remove = [edge for edge in subgraph.edges if random.random() < q_prime_k]
+        relaxed_graph.remove_edges_from(edges_to_remove)
+    return relaxed_graph
+        
 
+def reduceWeight(graph,layer):
+    relaxed_graph = graph.copy()
+    for subgraph in layer:
+        q_prime_k = get_q_prime_k(subgraph,graph,layer)
+        for u, v, weight in G.edges.data('weight'):
+            relaxed_graph.edges[u, v]['weight'] *= q_prime_k
+    return relaxed_graph
+
+
+#Refinement
+"""
+(1) Weaken the structures of all other layers from the original
+network to obtain a reduced network;
+(2) Apply the base algorithm to the resulting network.
+"""
+def refinement(layers,G):
+    output_layers = []
+    for i,layer in enumerate(layers):
+        G_reduced = G.copy()
+        for j in range(len(layers)):
+            if j == i:
+                continue
+            G_reduced = removeEdge(G_reduced,layers[j])
+        partition = louvain(G_reduced)
+        m = modularity(partition)
+        output_layers.append(partition_to_layer(partition,G))
+    return output_layers
