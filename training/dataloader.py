@@ -4,7 +4,7 @@ import pandas as pd
 import random
 
 class Dataset:
-	def __init__(self, directory = './data', embeddings=None, G=None, embeddings_file=None, graph_file=None):
+	def __init__(self, directory = './data', embeddings=None, G=None, embeddings_file=None, graph_file=None, embedding_dim=64):
 		
 		self.directory = directory
 
@@ -21,11 +21,12 @@ class Dataset:
 			self.G = G
 
 		self.weights_dict = self.get_weights_dict(directory+'/' + graph_file)
-
+		# print("got weight dict")
 		pos_examples = self.get_positive_examples()
+		# print("got positive exampels")
 		self.num_pos_examples = len(pos_examples)
-		neg_examples, self.edges_used = self.get_negative_examples(num_pos_examples)
-		all_examples = pos_examples + neg_examples
+		neg_examples, self.edges_used = self.get_negative_examples(20)#self.num_pos_examples)
+		all_examples = np.vstack([pos_examples, neg_examples])
 		cols = ['src' + str(i) for i in range(embedding_dim)] + ['dst' + str(i) for i in range(embedding_dim)] + ['label']
 		df = pd.DataFrame(all_examples, columns = cols)
 		df.reset_index()
@@ -75,7 +76,7 @@ class Dataset:
 	        dst_embedding = self.embeddings[str(edge[1])]
 	        edge_vector = src_embedding + dst_embedding + [self.weights_dict[(edge[0], edge[1])]] # label = edge weight
 	        pos_examples.append(edge_vector)
-	    return pos_examples
+	    return np.vstack(pos_examples)
 
 	# generate negative examples
 	def get_negative_examples(self, num_examples, attempts = 3000000, len_threshold = 5):
@@ -88,6 +89,7 @@ class Dataset:
 	        rnd_node_pair = random.choices(node_list, k = 2)
 	        src = rnd_node_pair[0]
 	        dst = rnd_node_pair[1]
+	        if (str(src) not in self.embeddings) or (str(dst) not in self.embeddings): continue
 	        if self.G.has_edge(src, dst):
 	            continue
 	        try:    
@@ -95,13 +97,12 @@ class Dataset:
 	        except nx.NetworkXNoPath:
 	            continue
 	        if(path_length) >= len_threshold:
-	        	if (str(edge[0]) not in self.embeddings) or (str(edge[1]) not in self.embeddings): continue
 	            src_embedding = self.embeddings[str(src)]
 	            dst_embedding = self.embeddings[str(dst)]
 	            edge_vector = src_embedding + dst_embedding + [0] # label = 0
 	            neg_examples.append(edge_vector)
 	            edges_used.add((src, dst))
-	    return neg_examples, edges_used
+	    return np.vstack(neg_examples), edges_used
 
 
 	   # generate inference examples
@@ -114,6 +115,7 @@ class Dataset:
 	        rnd_node_pair = random.choices(node_list, k=2)
 	        src = rnd_node_pair[0]
 	        dst = rnd_node_pair[1]
+	        if (str(src) not in self.embeddings) or (str(dst) not in self.embeddings): continue
 	        if self.G.has_edge(src, dst):
 	            continue
 	        edge_tuple = (src, dst)

@@ -28,7 +28,7 @@ parser.add_argument('--p', dest='p', type=float, default=1.0)
 parser.add_argument('--walk_length', dest='walk_length', type=int, default=50)
 parser.add_argument('--num_walks', dest='num_walks', type=int, default=200)
 parser.add_argument('--window', dest='window', type=int, default=10)
-parser.add_argument('--workers', dest='workers', type=int, default=8)
+parser.add_argument('--workers', dest='workers', type=int, default=1)
 parser.add_argument('--dropout', dest='dropout', type=float, default=None)
 parser.add_argument('--layers', dest='layers', nargs='+', help='space seperated list which specifies size of each layer, if using rnn the last value is the value for the dense network')
 parser.add_argument('--dense_classifier', dest='dense_classifier', type=int, default=1)
@@ -42,7 +42,7 @@ args = parser.parse_args()
 # assert(args.dropout <= 1.0 and args.dropout >= 0.0)
 # args.dropout = True if args.dropout else False
 args.dense_classifier = True if args.dense_classifier else False
-
+args.layers = [int(d) for d in args.layers]
 
 from keras import backend as K
 session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
@@ -61,10 +61,8 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 						p=p,
 						q=q,
 						weight_key='weight',
-						temp_folder=temp_folder)#, 
-						#workers=workers)
+						temp_folder=temp_folder)
 		model = model.fit(window=window, min_count=1, seed=seed, alpha=learning_rate, batch_words=4)
-		# embeddings = model.save()
 		model.wv.save_word2vec_format('./temp_embeddings_file.emb')
 		embeddings = node2vec_embedder('temp_embeddings_file.emb')
 		os.remove('./temp_embeddings_file.emb')
@@ -72,11 +70,13 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 		model = LINE(G, embedding_size=embedding_dim, order='second')
 		model.train(batch_size=batch_size, epochs=epochs, verbose=2)
 		embeddings = model.get_embeddings()
+	elif embedder == 'rolx':
+		embeddings = np.load('./data/rolx_embeddings.npy')[()]
+		embeddings = {str(k):v for k,v in embeddings.items()}
 	return embeddings
 
 
 def main(args):
-	
 	# df = pd.read_csv('./data/reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
 	df = pd.read_csv(args.directory+'/'+args.graph_file, header=None, names=['source', 'target', 'weight'])
 	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
@@ -116,16 +116,22 @@ def main(args):
 			json.dump(embeddings, fp)
 	# print(args.layers)
 	# print(embeddings)
-	data = Dataset(embeddings=embeddings, G=G, directory=args.directory, graph_file=args.graph_file)
+	data = Dataset(embeddings=embeddings, G=G, directory=args.directory, graph_file=args.graph_file, embedding_dim=args.embedding_dim)
+
 	classifier = Classifier(dense_classifier=args.dense_classifier,
 							embedding_dim=args.embedding_dim,
 							layers=args.layers,
-							dropout=args.dropout)
-
+							dropout=args.dropout,
+							epochs=args.epochs,
+							validation_split=args.validation_split,
+							batch_size=args.batch_size)
+	print('about to get train data')
 	train_data = data.train_data()
+	print('got train data')
 	test_data = data.test_data()
+	print('got test data')
 
-	filepath = args.directory+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_accuracy:.2f}.hdf5'
+	filepath = args.directory+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
 	classifier.train(filepath=filepath,
 					patience=args.patience, 
 					validation_split=args.validation_split, 
