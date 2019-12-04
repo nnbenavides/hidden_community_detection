@@ -1,21 +1,21 @@
 import os
 import numpy as np
 from utils import gen_layers, create_arg_string
-from multiprocessing import Process
+from threading import Thread
 
 
 max_tests = 1000
 num_tests = max_tests
 seen = {}
-processes = []
+threads = []
 # workers = int(num_cpus/max_threads)
-max_processes = 1
+max_threads = 1
 
-def check_processes(processes):
+def check_threads(threads):
 	count = 0
-	for i in reversed(range(len(processes))):
-		if not processes[i].is_alive():
-			del processes[i]
+	for i in reversed(range(len(threads))):
+		if not threads[i].is_alive():
+			del threads[i]
 			count += 1
 	
 	return count
@@ -23,23 +23,23 @@ def check_processes(processes):
 def run_new(args):
 	os.system('python3 train.py %s' % args)
 
-print("Starting %d processes" % max_processes)
-for t in range(max_processes):
+print("Starting %d threads" % max_threads)
+for t in range(max_threads):
 	
 	new_args = create_arg_string()
 	while new_args in seen:
 		new_args = create_arg_string()
 
 	seen[new_args] = True
-	processes.append(Process(target=run_new, args=(new_args,)))
+	threads.append(Thread(target=run_new, args=(new_args,)))
 
-	processes[-1].start()
+	threads[-1].start()
 	num_tests-=1
 
-print("Finished starting %d processes" % max_processes)
+print("Finished starting %d threads" % max_threads)
 
 while(num_tests > 0):
-	count = check_processes(processes)
+	count = check_threads(threads)
 	if count > 0:
 		for c in range(count):
 			if num_tests == 0: break
@@ -48,14 +48,14 @@ while(num_tests > 0):
 				new_args = create_arg_string()
 
 			seen[new_args] = True
-			processes.append(Process(target=run_new, args=(new_args,)))
-			print("Starting process")
-			processes[-1].start()
+			threads.append(Thread(target=run_new, args=(new_args,)))
+			print("Starting thread")
+			threads[-1].start()
 			num_tests-=1
 	else:
 		continue
 		
-for p in processes:
-	p.join()
+for t in threads:
+	t.join()
 
 
