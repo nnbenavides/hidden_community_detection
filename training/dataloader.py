@@ -9,16 +9,18 @@ class Dataset:
 		self.directory = directory
 
 		if embeddings is None:
-			assert(embeddings_file is not None)
-			self.embeddings = load_embeddings(embeddings_file)
+			# assert(embeddings_file is not None)
+			self.embeddings = self.load_embeddings(embeddings_file)
 		else:
 			self.embeddings = embeddings
 
 		if G is None:
-			assert(graph_file is not None)
+			# assert(graph_file is not None)
 			self.G = self.load_graph(graph_file)
 		else:
 			self.G = G
+
+		self.weights_dict = self.get_weights_dict(directory+'/' + graph_file)
 
 		pos_examples = self.get_positive_examples()
 		self.num_pos_examples = len(pos_examples)
@@ -45,6 +47,21 @@ class Dataset:
 	    G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
 	    return G
 
+	def get_weights_dict(self, filename):
+	    weights = pd.read_csv(filename, header = None)
+	    weights.columns = ['src', 'dst', 'weight']
+	    
+	    weights_dict = {}
+	    for i in range(weights.shape[0]):
+	        src = weights.iloc[i, 0]
+	        dst = weights.iloc[i, 1]
+	        weight = weights.iloc[i, 2]
+
+	        weights_dict[(src, dst)] = weight
+	        weights_dict[(dst, src)] = weight
+
+	    return weights_dict
+
 	def load_embeddings(self, filename):
 	    x = np.load(self.directory + filename, allow_pickle = True)
 	    return x.item()
@@ -53,15 +70,16 @@ class Dataset:
 	def get_positive_examples(self):
 	    pos_examples = []
 	    for edge in self.G.edges():
-	        src_embedding = self.embeddings[edge[0]]
-	        dst_embedding = self.embeddings[edge[1]]
-	        edge_vector = src_embedding + dst_embedding + [1] # label = 1
+	        if (str(edge[0]) not in self.embeddings) or (str(edge[1]) not in self.embeddings): continue
+	        src_embedding = self.embeddings[str(edge[0])]
+	        dst_embedding = self.embeddings[str(edge[1])]
+	        edge_vector = src_embedding + dst_embedding + [self.weights_dict[(edge[0], edge[1])]] # label = edge weight
 	        pos_examples.append(edge_vector)
 	    return pos_examples
 
 	# generate negative examples
 	def get_negative_examples(self, num_examples, attempts = 3000000, len_threshold = 5):
-	    node_list = list(G.nodes())
+	    node_list = list(self.G.nodes())
 	    neg_examples = []
 	    edges_used = set()
 	    for i in range(attempts):
@@ -77,8 +95,9 @@ class Dataset:
 	        except nx.NetworkXNoPath:
 	            continue
 	        if(path_length) >= len_threshold:
-	            src_embedding = self.embeddings[src]
-	            dst_embedding = self.embeddings[dst]
+	        	if (str(edge[0]) not in self.embeddings) or (str(edge[1]) not in self.embeddings): continue
+	            src_embedding = self.embeddings[str(src)]
+	            dst_embedding = self.embeddings[str(dst)]
 	            edge_vector = src_embedding + dst_embedding + [0] # label = 0
 	            neg_examples.append(edge_vector)
 	            edges_used.add((src, dst))

@@ -1,3 +1,4 @@
+import numpy as np
 
 def node2vec_embedder(embedding_file):
 	embeddings = {}
@@ -8,11 +9,11 @@ def node2vec_embedder(embedding_file):
 	while(line):
 	    if line[0] == ' ': line = line[1:]
 	    line = line.split(' ')
-	    key = int(line[0])
-	    embedding = np.array([float(x) for x in line[1:]]).astype('float')
-	    embeddings[key] = embedding
+	    # key = int(line[0])
+	    embedding = [float(x) for x in line[1:]]
+	    embeddings[str(int(line[0]))] = embedding
 	    line = f.readline()
-	
+	    
 	return embeddings
 
 
