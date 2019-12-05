@@ -21,11 +21,12 @@ class Dataset:
 			self.G = G
 
 		self.weights_dict = self.get_weights_dict(directory+'/' + graph_file)
+		self.negative_edges = np.load(directory+'/negative_sample_edges.npy')
 		# print("got weight dict")
 		pos_examples = self.get_positive_examples()
 		# print("got positive exampels")
 		self.num_pos_examples = len(pos_examples)
-		neg_examples, self.edges_used = self.get_negative_examples(20)#self.num_pos_examples)
+		neg_examples, self.edges_used = self.get_negative_examples()#self.num_pos_examples)
 		all_examples = np.vstack([pos_examples, neg_examples])
 		cols = ['src' + str(i) for i in range(embedding_dim)] + ['dst' + str(i) for i in range(embedding_dim)] + ['label']
 		df = pd.DataFrame(all_examples, columns = cols)
@@ -36,7 +37,6 @@ class Dataset:
 		self.columns = df.columns
 		self.train_df = df[train_mask]
 		self.test_df = df[test_mask]
-		self.negative_edges = np.load(directory+'/negative_sample_edges.npy')
 
 	def train_data(self):
 		return self.train_df[self.columns[:-1]].values, self.train_df[self.columns[-1]].values
