@@ -9,7 +9,13 @@ num_tests = max_tests
 seen = {}
 threads = []
 # workers = int(num_cpus/max_threads)
-max_threads = 1
+max_threads = 4
+# device1 = int(max_threads/2)
+# device2 = int(max_threads/2)
+num_devices = 2
+curr_device = 0
+
+# devices_pointer = 0; devices = [int(max_threads/num_devices)]
 
 def check_threads(threads):
 	count = 0
@@ -20,8 +26,8 @@ def check_threads(threads):
 	
 	return count
 
-def run_new(args):
-	os.system('python3 train.py %s' % args)
+def run_new(args, curr_device):
+	os.system('CUDA_VISIBLE_DEVICES=%d; python3 train.py %s' % (args, curr_device))
 
 print("Starting %d threads" % max_threads)
 for t in range(max_threads):
@@ -31,8 +37,10 @@ for t in range(max_threads):
 		new_args = create_arg_string()
 
 	seen[new_args] = True
-	threads.append(Thread(target=run_new, args=(new_args,)))
 
+	threads.append(Thread(target=run_new, args=(new_args, curr_device,)))
+	curr_device += 1
+	if curr_device == num_devices; curr_device = 0
 	threads[-1].start()
 	num_tests-=1
 
@@ -48,7 +56,9 @@ while(num_tests > 0):
 				new_args = create_arg_string()
 
 			seen[new_args] = True
-			threads.append(Thread(target=run_new, args=(new_args,)))
+			threads.append(Thread(target=run_new, args=(new_args, curr_device,)))
+			curr_device += 1
+			if curr_device == num_devices; curr_device = 0
 			print("Starting thread")
 			threads[-1].start()
 			num_tests-=1
