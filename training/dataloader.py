@@ -81,16 +81,17 @@ class Dataset:
 
 	# generate negative examples
 	def get_negative_examples(self):
-		neg_examples = []
+		neg_examples = []; edges_used = {}
 		for edge in self.negative_edges:
 			if (str(edge[0]) not in self.embeddings) or (str(edge[1]) not in self.embeddings): continue
 			src = edge[0]
 			dst = edge[1]
-			src_embedding = self.embeddings[src]
-			dst_embedding = self.embeddings[dst]
+			src_embedding = self.embeddings[str(src)]
+			dst_embedding = self.embeddings[str(dst)]
 			edge_vector = list(src_embedding) + list(dst_embedding) + [0] # label = 0
 			neg_examples.append(edge_vector)
-		return np.vstack(neg_examples)
+			edges_used[(src, dst)] = True
+		return np.vstack(neg_examples), edges_used
 
 
 	   # generate inference examples
@@ -108,8 +109,8 @@ class Dataset:
 				continue
 			edge_tuple = (src, dst)
 			if edge_tuple not in self.edges_used:
-				src_embedding = self.embeddings[src]
-				dst_embedding = self.embeddings[dst]
+				src_embedding = self.embeddings[str(src)]
+				dst_embedding = self.embeddings[str(dst)]
 				edge_vector = src_embedding + dst_embedding
 				inference_examples.append(edge_vector)
 		return np.vstack(inference_examples)
