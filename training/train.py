@@ -13,45 +13,6 @@ import networkx as nx
 np.random.seed(2019)
 tf.compat.v1.set_random_seed(2019)
 
-
-parser = argparse.ArgumentParser(description='args')
-parser.add_argument('--directory', dest='directory', type=str, default='./data')
-parser.add_argument('--embedder', dest='embedder', type=str, default='node2vec')
-parser.add_argument('--graph_file', dest='graph_file', type=str, default='reddit_nodes_weighted_full.csv')
-parser.add_argument('--embedding_batch_size', dest='embedding_batch_size', type=int, default=1024)
-parser.add_argument('--embedding_epochs', dest='embedding_epochs', type=int, default=250)
-parser.add_argument('--embedding_dim', dest='embedding_dim', type=int, default=96)
-parser.add_argument('--embedding_seed', dest='embedding_seed', type=int, default=2019)
-parser.add_argument('--embedding_lr', dest='embedding_lr', type=float, default=0.05)
-parser.add_argument('--q', dest='q', type=float, default=1.0)
-parser.add_argument('--p', dest='p', type=float, default=1.0)
-parser.add_argument('--walk_length', dest='walk_length', type=int, default=50)
-parser.add_argument('--num_walks', dest='num_walks', type=int, default=200)
-parser.add_argument('--window', dest='window', type=int, default=10)
-parser.add_argument('--workers', dest='workers', type=int, default=1)
-parser.add_argument('--dropout', dest='dropout', type=float, default=None)
-parser.add_argument('--layers', dest='layers', nargs='+', help='space seperated list which specifies size of each layer, if using rnn the last value is the value for the dense network')
-parser.add_argument('--dense_classifier', dest='dense_classifier', type=int, default=1)
-parser.add_argument('--patience', dest='patience', type=int, default=15)
-parser.add_argument('--validation_split', dest='validation_split', type=float, default=0.2)
-parser.add_argument('--batch_size', dest='batch_size', type=int, default=120)
-parser.add_argument('--epochs', dest='epochs', type=int, default=250)
-parser.add_argument('--temp_folder', dest='temp_folder', type=str, default='temp_folder')
-args = parser.parse_args()
-
-# assert(args.dropout <= 1.0 and args.dropout >= 0.0)
-# args.dropout = True if args.dropout else False
-args.dense_classifier = True if args.dense_classifier else False
-args.layers = [int(d) for d in args.layers]
-args.batch_size = args.batch_size if args.dense_classifier else 24
-
-from keras import backend as K
-session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
-sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
-K.set_session(sess)
-
-
-
 def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, embedding_dim=96, batch_size=1024, walk_length=30, num_walks=200, window=10, p=1.0, q=1.0, workers=1, temp_folder=None):
 	if embedder == 'node2vec':
 		if not os.path.isdir(temp_folder):
@@ -73,80 +34,128 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 		embeddings = model.get_embeddings()
 	elif embedder == 'rolx':
 		# embeddings = np.load('./data/rolx_embeddings.npy')[()]
-		with open(args.directory+'/embeddings/rolx_embedding.json') as fp:
+		with open(args["directory+'/embeddings/rolx_embedding.json'"]) as fp:
 			embeddings = json.load(fp)
 		# embeddings = {str(k):v for k,v in embeddings.items()}
 	return embeddings
 
 
-def main(args):
+def run_training(args):
 	# df = pd.read_csv('./data/reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
-	df = pd.read_csv(args.directory+'/'+args.graph_file, header=None, names=['source', 'target', 'weight'])
+	df = pd.read_csv(args["directory"]+'/'+args["graph_file"], header=None, names=['source', 'target', 'weight'])
 	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
 	# G = nx.complete_graph(100)
 	full_filepath, embedd_str = make_filepath(args)
-	os.mkdir(args.directory+'/'+full_filepath)
+	os.mkdir(args["directory"]+'/'+full_filepath)
 
 	save_embeddings = True
-	if not os.path.isdir(args.directory+'/embeddings'):
-		os.mkdir(args.directory+'/embeddings')
+	if not os.path.isdir(args["directory"]+'/embeddings'):
+		os.mkdir(args["directory"]+'/embeddings')
 
 	# path.exists("guru99.txt")
-	if os.path.exists(args.directory+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json'):
+	if os.path.exists(args["directory"]+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json'):
 		save_embeddings = False
-		with open(args.directory+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'r') as fp:
+		with open(args["directory"]+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'r') as fp:
 			embeddings = json.load(fp)
-		# embeddings = load(args.directory+'/'+embedd_str+'/embeddings.txt')
+		# embeddings = load(args["directory+'/'+embedd_str+'/embeddings.txt')
 	else:
 		embeddings = embedding_trainer(G=G, 
-									embedding_dim=args.embedding_dim,
-									embedder=args.embedder.lower(), 
-									batch_size=args.embedding_batch_size,
-									epochs=args.embedding_epochs,
-									seed=args.embedding_seed,
-									learning_rate=args.embedding_lr,
-									walk_length=args.walk_length,
-									num_walks=args.num_walks,
-									window=args.window,
-									p=args.p,
-									q=args.q,
-									workers=args.workers,
-									temp_folder=args.directory+'/'+args.temp_folder)
+									embedding_dim=args["embedding_dim"],
+									embedder=args["embedder"].lower(), 
+									batch_size=args["embedding_batch_size"],
+									epochs=args["embedding_epochs"],
+									seed=args["embedding_seed"],
+									learning_rate=args["embedding_lr"],
+									walk_length=args["walk_length"],
+									num_walks=args["num_walks"],
+									window=args["window"],
+									p=args["p"],
+									q=args["q"],
+									workers=args["workers"],
+									temp_folder=args["directory"]+'/'+args["temp_folder"])
 
 	if save_embeddings:
-		# os.mkdir(args.directory+'/embeddings/'+embedd_str+'embedding.json')
-		with open(args.directory+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'w') as fp:
+		# os.mkdir(args["directory+'/embeddings/'+embedd_str+'embedding.json')
+		with open(args["directory"]+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'w') as fp:
 			json.dump(embeddings, fp)
-	# print(args.layers)
+	# print(args["layers)
 	# print(embeddings)
-	data = Dataset(embeddings=embeddings, G=G, directory=args.directory, graph_file=args.graph_file, embedding_dim=args.embedding_dim)
+	data = Dataset(embeddings=embeddings, G=G, directory=args["directory"], graph_file=args["graph_file"], embedding_dim=args["embedding_dim"])
 
-	classifier = Classifier(dense_classifier=args.dense_classifier,
-							embedding_dim=args.embedding_dim,
-							layers=args.layers,
-							dropout=args.dropout,
-							epochs=args.epochs,
-							validation_split=args.validation_split,
-							batch_size=args.batch_size)
+	classifier = Classifier(dense_classifier=args["dense_classifier"],
+							embedding_dim=args["embedding_dim"],
+							layers=args["layers"],
+							dropout=args["dropout"],
+							epochs=args["epochs"],
+							validation_split=args["validation_split"],
+							batch_size=args["batch_size"])
 	print('about to get train data')
 	train_data = data.train_data()
 	print('got train data')
 	test_data = data.test_data()
 	print('got test data')
 
-	filepath = args.directory+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
+	filepath = args["directory"]+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
 	classifier.train(filepath=filepath,
-					patience=args.patience, 
-					validation_split=args.validation_split, 
-					batch_size=args.batch_size, 
-					epochs=args.epochs, 
+					patience=args["patience"], 
+					validation_split=args["validation_split"], 
+					batch_size=args["batch_size"], 
+					epochs=args["epochs"], 
 					train_data=train_data, 
 					test_data=test_data)
 
 	# get_inference_examples(self, edges_used, num_examples = 100000, attempts = 1000000):
 
+def main(directory='./data', 
+				embedder='node2vec', 
+				graph_file='reddit_nodes_weighted_full.csv',
+				embedding_batch_size=1024,
+				embedding_epochs=250,
+				embedding_dim=96,
+				embedding_seed=2019,
+				embedding_lr=0.05,
+				q=1.0,
+				p=1.0,
+				walk_length=50,
+				num_walks=100,
+				window=10,
+				workers=1,
+				dropout=None,
+				layers=[128,64,32],
+				dense_classifier=True,
+				patience=10
+				validation_split=0.2
+				batch_size=120
+				epochs=1000,
+				temp_folder='temp_folder', device=0)
 
-if __name__=='__main__':
+	os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+	os.environ["CUDA_VISIBLE_DEVICES"]=("%d" % device)
+	
+	args = {'embedder':embedder, 
+				'graph_file':graph_file,
+				'embedding_batch_size':batch_size,
+				'embedding_epochs':embedding_epochs,
+				'embedding_dim':embedding_dim,
+				'embedding_seed':embedding_seed,
+				'embedding_lr':embedding_lr,
+				'q':q,
+				'p':p,
+				'walk_length':walk_length,
+				'num_walks':num_walks,
+				'window':window,
+				'workers':workers,
+				'dropout':dropout,
+				'layers':layers,
+				'dense_classifier':dense_classifier,
+				'patience':patience,
+				'validation_split':validation_split,
+				'batch_size':batch_size,
+				'epochs':epochs,
+				'temp_folder':temp_folder}
+
+	run_training(args)
+# if __name__=='__main__':
 	main(args)
 
 

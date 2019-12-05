@@ -19,11 +19,11 @@ def node2vec_embedder(embedding_file):
 
 
 def make_filepath(args):
-	node2vecstr = '_numwalks-%d_walklength-%d_window-%d' % (args.num_walks, args.walk_length, args.window) if args.embedder.lower()=='node2vec' else ''
-	embedd_str = '-dimension-%d_lr-%.4f_seed-%d_epochs-%d%s' % (args.embedding_dim, args.embedding_lr, args.embedding_seed, args.embedding_epochs, node2vecstr) if args.embedder.lower() != 'rolx' else ''
-	layer_str = ''.join([str(d)+'+' for d in args.layers])
-	nn_str = ('dense_' if args.dense_classifier else 'rnn_') + ('dropout-%.2f_' % args.dropout if args.dropout is not None else '') + 'layers-%s' % layer_str[:-1]
-	full_filepath = '%s%s_NN-%s' % (args.embedder.lower(), embedd_str, nn_str)
+	node2vecstr = '_numwalks-%d_walklength-%d_window-%d' % (args["num_walks"], args["walk_length"], args["window"]) if args["embedder"].lower()=='node2vec' else ''
+	embedd_str = '-dimension-%d_lr-%.4f_seed-%d_epochs-%d%s' % (args["embedding_dim"], args["embedding_lr"], args["embedding_seed"], args["embedding_epochs"], node2vecstr) if args["embedder"].lower() != 'rolx' else ''
+	layer_str = ''.join([str(d)+'+' for d in args["layers"]])
+	nn_str = ('dense_' if args["dense_classifier"] else 'rnn_') + ('dropout-%.2f_' % args["dropout"] if args["dropout"] is not None else '') + 'layers-%s' % layer_str[:-1]
+	full_filepath = '%s%s_NN-%s' % (args["embedder"].lower(), embedd_str, nn_str)
 
 	return full_filepath, embedd_str
 
@@ -52,39 +52,41 @@ node2vecs = [[10, 20, 30, 40, 50],
 # 				[.2, .4, .6, .8, 1.0]]
 
 nn_args = [[False, True, True, True],[None, .25, .5]]
-layer_choices = [[2, 3, 4, 5, 6, 8], [1, 2, 3, 4]]
+layer_choices = [[2, 3, 4, 5, 6, 8], [1, 2, 3]]
 
-def create_arg_string():
+def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embedding_batch_size=1024, embedding_epochs=250, device=-1):
+	assert(device!=-1)
+
+	
 	embedder = choice(embed_args[0])
-	arg_string = '--embedder %s ' % embedder
 
-	for i in range(1, len(embed_args)):
-		if arguments[i] == 'embedding_dim' and embedder == '"rolx"':
-			arg_string += '--%s ' % arguments[i] + str(96) + ' '
-		else:
-			arg_string += '--%s ' % arguments[i] + str(choice(embed_args[i])) + ' '
-
-	if embedder == 'node2vec':
-		for i in range(len(node2vecs)):
-			arg_string += '--%s ' % arguments[i+3] + str(choice(node2vecs[i])) + ' '
-
-
+	embedding_dim = 96 if embedder == "rolx" else choice(embed_args[1])
+	embedding_seed = choice(embed_args[2])
+	embedding_lr = choice(embed_args[3])
+	p = None if embedder != "node2vec" else choice(node2vecs[3])
+	q = None if embedder != "node2vec" else choice(node2vecs[4])
+	walk_length = None if embedder != "node2vec" else node2vecs[0]
+	num_walks = None if embedder != "node2vec" else node2vecs[1]
+	window = None if embedder != "node2vec" else node2vecs[2]
+	workers = 1
 	dense = choice(nn_args[0])
 	dropout = choice(nn_args[1]) if dense else None
 	layers = choice(layer_choices[0] if dense else layer_choices[1])
+	layers = gen_layers(layers, dense)
+	patience=10
+	validation_split=0.2
+	batch_size=120
+	epochs=1000
+	temp_folder='temp_folder'
+	args = (directory, embedder, graph_file, embedding_batch_size, embedding_epochs, embedding_dim, 
+		embedding_seed, embedding_lr, p, q, walk_length, num_walks, window, workers, dropout, layers, dense, 
+		patience, validation_split, batch_size, epochs, temp_folder,)
 
-	full = gen_layers(layers, dense)
-	layer_str = ''.join([str(d)+' ' for d in full])[:-1]
-	arg_string += '--dense_classifier ' + str(1 if dense else 0) + ' '
-	if dropout:
-		arg_string += '--dropout %.4f ' % dropout	
-	arg_string += '--layers %s' % layer_str
-
-	return arg_string
+	return args
 
 
 
-layer1 = [32, 64, 128, 256, 512, 1024]
+layer1 = [32, 64, 128, 256, 512]
 
 def gen_layers(layers, dense):
 	
