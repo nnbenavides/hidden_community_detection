@@ -80,8 +80,7 @@ class Dataset:
 		return np.vstack(pos_examples)
 
 	# generate negative examples
-	def get_negative_examples(self, num_examples, attempts = 3000000, len_threshold = 5):
-		node_list = list(G.nodes())
+	def get_negative_examples(self):
 		neg_examples = []
 		for edge in self.negative_edges:
 			src = edge[0]
