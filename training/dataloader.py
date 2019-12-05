@@ -83,6 +83,7 @@ class Dataset:
 	def get_negative_examples(self):
 		neg_examples = []
 		for edge in self.negative_edges:
+			if (str(edge[0]) not in self.embeddings) or (str(edge[1]) not in self.embeddings): continue
 			src = edge[0]
 			dst = edge[1]
 			src_embedding = self.embeddings[src]
