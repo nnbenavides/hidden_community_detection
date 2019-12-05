@@ -85,11 +85,11 @@ class Dataset:
 		for edge in self.negative_edges:
 			src = edge[0]
 			dst = edge[1]
-			src_embedding = embeddings[src]
-			dst_embedding = embeddings[dst]
+			src_embedding = self.embeddings[src]
+			dst_embedding = self.embeddings[dst]
 			edge_vector = list(src_embedding) + list(dst_embedding) + [0] # label = 0
 			neg_examples.append(edge_vector)
-		return neg_examples
+		return np.vstack(neg_examples)
 
 
 	   # generate inference examples
