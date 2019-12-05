@@ -71,8 +71,10 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 		model.train(batch_size=batch_size, epochs=epochs, verbose=2)
 		embeddings = model.get_embeddings()
 	elif embedder == 'rolx':
-		embeddings = np.load('./data/rolx_embeddings.npy')[()]
-		embeddings = {str(k):v for k,v in embeddings.items()}
+		# embeddings = np.load('./data/rolx_embeddings.npy')[()]
+		with open(args.directory+'/embeddings/rolx_embedding.json') as fp:
+			embeddings = json.load(fp)
+		# embeddings = {str(k):v for k,v in embeddings.items()}
 	return embeddings
 
 
@@ -89,9 +91,9 @@ def main(args):
 		os.mkdir(args.directory+'/embeddings')
 
 	# path.exists("guru99.txt")
-	if os.path.exists(args.directory+'/embeddings/'+embedd_str+'_embedding.json'):
+	if os.path.exists(args.directory+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json'):
 		save_embeddings = False
-		with open(args.directory+'/embeddings/'+embedd_str+'_embedding.json', 'r') as fp:
+		with open(args.directory+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'r') as fp:
 			embeddings = json.load(fp)
 		# embeddings = load(args.directory+'/'+embedd_str+'/embeddings.txt')
 	else:
@@ -112,7 +114,7 @@ def main(args):
 
 	if save_embeddings:
 		# os.mkdir(args.directory+'/embeddings/'+embedd_str+'embedding.json')
-		with open(args.directory+'/embeddings/'+embedd_str+'_embedding.json', 'w') as fp:
+		with open(args.directory+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'w') as fp:
 			json.dump(embeddings, fp)
 	# print(args.layers)
 	# print(embeddings)
