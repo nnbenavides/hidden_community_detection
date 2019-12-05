@@ -86,7 +86,7 @@ class Dataset:
 	    for i in range(attempts):
 	        if len(neg_examples) == num_examples:
 	            break
-	        rnd_node_pair = random.choices(node_list, k = 2)
+	        rnd_node_pair = np.random.choice(node_list, size=(2,1))
 	        src = rnd_node_pair[0]
 	        dst = rnd_node_pair[1]
 	        if (str(src) not in self.embeddings) or (str(dst) not in self.embeddings): continue
@@ -112,7 +112,7 @@ class Dataset:
 	    for i in range(attempts):
 	        if len(inference_examples) == num_examples:
 	            break
-	        rnd_node_pair = random.choices(node_list, k=2)
+	        rnd_node_pair = np.random.choice(node_list, size=(2, 1))
 	        src = rnd_node_pair[0]
 	        dst = rnd_node_pair[1]
 	        if (str(src) not in self.embeddings) or (str(dst) not in self.embeddings): continue

@@ -2,16 +2,14 @@ import os
 import numpy as np
 from utils import gen_layers, create_arg_string
 from threading import Thread
+from time import sleep
 
 
 max_tests = 1000
 num_tests = max_tests
 seen = {}
 threads = []
-# workers = int(num_cpus/max_threads)
-max_threads = 4
-# device1 = int(max_threads/2)
-# device2 = int(max_threads/2)
+max_threads = 8
 num_devices = 2
 curr_device = 0
 
@@ -45,7 +43,7 @@ for t in range(max_threads):
 	num_tests-=1
 
 print("Finished starting %d threads, will spawn more as they die" % max_threads)
-
+sleep(25)
 while(num_tests > 0):
 	count = check_threads(threads)
 	if count > 0:
