@@ -27,7 +27,7 @@ def check_threads(threads):
 	return count
 
 def run_new(args, curr_device):
-	os.system('CUDA_VISIBLE_DEVICES=%d; python3 train.py %s' % (args, curr_device))
+	os.system('CUDA_VISIBLE_DEVICES=%d; python3 train.py %s' % (curr_device, args))
 
 print("Starting %d threads" % max_threads)
 for t in range(max_threads):
@@ -40,7 +40,7 @@ for t in range(max_threads):
 
 	threads.append(Thread(target=run_new, args=(new_args, curr_device,)))
 	curr_device += 1
-	if curr_device == num_devices; curr_device = 0
+	if curr_device == num_devices: curr_device = 0
 	threads[-1].start()
 	num_tests-=1
 
@@ -58,7 +58,7 @@ while(num_tests > 0):
 			seen[new_args] = True
 			threads.append(Thread(target=run_new, args=(new_args, curr_device,)))
 			curr_device += 1
-			if curr_device == num_devices; curr_device = 0
+			if curr_device == num_devices: curr_device = 0
 			print("Starting thread")
 			threads[-1].start()
 			num_tests-=1
