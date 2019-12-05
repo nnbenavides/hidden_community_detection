@@ -43,7 +43,6 @@ for t in range(max_threads):
 	num_tests-=1
 
 print("Finished starting %d threads, will spawn more as they die" % max_threads)
-sleep(25)
 while(num_tests > 0):
 	count = check_threads(threads)
 	if count > 0:

@@ -43,6 +43,7 @@ args = parser.parse_args()
 # args.dropout = True if args.dropout else False
 args.dense_classifier = True if args.dense_classifier else False
 args.layers = [int(d) for d in args.layers]
+args.batch_size = args.batch_size if args.dense_classifier else 24
 
 from keras import backend as K
 session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
