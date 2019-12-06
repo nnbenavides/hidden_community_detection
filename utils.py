@@ -16,8 +16,8 @@ def layer_to_partition(layer,G):
         for node in list(subgraph.nodes):
             partition[node] = i
     return partition
-    
-    
+
+
 #partition is a dictionary of node:community mappings
 def partition_to_layer(partition,G):
     max_value = max(partition.values())
@@ -31,9 +31,9 @@ def partition_to_layer(partition,G):
 
 
 def loadGraphs():
-    df = pd.read_csv('reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
+    df = pd.read_csv('data/reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
     G_weighted = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
-    G = nx.read_edgelist('undirected_unweighted_union_reddit_edge_list.tsv')
+    G = nx.read_edgelist('data/undirected_unweighted_union_reddit_edge_list.tsv')
     return G, G_weighted
 
 
@@ -53,7 +53,7 @@ def plot_hist(partition,filename='community_hist.png'):
     plt.figure()
     plt.hist(communities_u.values())
     plt.savefig(filename)
-    
+
 def communityGN(graph):
     communities_generator = nxcm.girvan_newman(graph)
     top_level_communities = next(communities_generator)
@@ -82,7 +82,7 @@ def identifyLayer(graph, algorithm='GN'):
         raise Exception("Invalid argument for community detection algorithm, %s" % algorithm)
 
 def removeEdge(graph,layer):
-    #Take layer, a division of graph into communities, and 
+    #Take layer, a division of graph into communities, and
     #weaken the communities within graph by removing the edges
     #in that layer completely
     relaxed_graph = graph.copy()
@@ -102,8 +102,8 @@ def get_q_prime_k(subgraph,graph,layer):
 
 def reduceEdge(graph,layer):
     """
-    Take layer, a division of graph into communities, and 
-    weaken the communities within graph by reducing the 
+    Take layer, a division of graph into communities, and
+    weaken the communities within graph by reducing the
     weight of each edge within community C_k by a factor of
     q'k = p_k/q_k
     q_k = (d_k - 2e_kk)/(n_k(n-n_k)
@@ -125,8 +125,8 @@ def reduceEdge(graph,layer):
 
 def reduceWeight(graph,layer):
     """
-    Take layer, a division of graph into communities, and 
-    weaken the communities within graph by reducing the 
+    Take layer, a division of graph into communities, and
+    weaken the communities within graph by reducing the
     weight of each edge within community C_k by a factor of
     q'k = p_k/q_k
     q_k = (d_k - 2e_kk)/(n_k(n-n_k)
@@ -137,7 +137,7 @@ def reduceWeight(graph,layer):
     d_k is the sum of degrees of nodes in C_k
     e_kk is the number of edges in C_k
     n is the total number of nodes in graph
-    reduce weight of 
+    reduce weight of
     """
     relaxed_graph = graph.copy()
     for subgraph in layer:
@@ -153,9 +153,28 @@ def reduceWeight(graph,layer):
 (1) Weaken the structures of all other layers from the original
 network to obtain a reduced network;
 (2) Apply the base algorithm to the resulting network.
+
+(1) Calculate Q0 for t = 0, i.e. aer identication, before any
+renement is conducted;
+(2) Perform T = 10 tentative iterations of renement, and
+calculate Qt for each t ∈ {1, ...,T };
+(3) Calculate the average improvement ratio of modularity per
+iteration4
+: RT = Sum Q_t from 1 to T/ (10*Q_0)
 """
+def average_modularity(layers,G):
+    Q = 0
+    for layer in layers:
+        #print(layer)
+        partition = layer_to_partition(layer,G)
+        m = modularity(partition,G)
+        Q += m
+    Q /= len(layers)
+    return Q
+
 def refinement(layers,G):
     output_layers = []
+    Q = 0
     for i,layer in enumerate(layers):
         G_reduced = G.copy()
         for j in range(len(layers)):
@@ -163,22 +182,34 @@ def refinement(layers,G):
                 continue
             G_reduced = removeEdge(G_reduced,layers[j])
         partition = louvain(G_reduced)
-        m = modularity(partition)
+        m = modularity(partition,G_reduced)
         output_layers.append(partition_to_layer(partition,G))
     return output_layers
 
-def hicode(G):
-    m = -1
+def hicode(G, num_layers = 1):
+    #Identification
+    layers = []
     G_curr = G.copy()
     partition = louvain(G_curr)
     layer = partition_to_layer(partition,G_curr)
-    new_m = modularity(partition,G_curr)
-    print("starting mod: ",new_m)
-    m = new_m
-    G_curr = reduceEdge(G_curr,layer)
-    print(G_curr)
-    partition = louvain(G_curr)
-    layer = partition_to_layer(partition,G_curr)
-    new_m = modularity(partition,G_curr)
-    print("iteration: ",new_m)
-    return m
+    layers.append(layer)
+    for i in range(num_layers-1):
+        print("iteration: ",i)
+        G_curr = reduceEdge(G_curr,layer)
+        partition = louvain(G_curr)
+        layer = partition_to_layer(partition,G_curr)
+        layers.append(layer)
+    Q_0 = average_modularity(layers,G_curr)
+
+    #refinement
+    print("Refinement")
+    R_t = 0
+    for i in range(10):
+        print(i)
+        layers = refinement(layers,G_curr)
+        Q = average_modularity(layers,G_curr)
+        R_t += Q
+
+    R_t /= 10*Q_0
+
+    return R_t

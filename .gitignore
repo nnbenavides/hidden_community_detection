@@ -4,3 +4,4 @@
 !.gitignore
 *.txt
 GraphEmbedding/
+__pycache__/
