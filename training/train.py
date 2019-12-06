@@ -23,6 +23,7 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 						p=p,
 						q=q,
 						weight_key='weight',
+						workers=5,
 						temp_folder=temp_folder)
 		model = model.fit(window=window, min_count=1, seed=seed, alpha=learning_rate, batch_words=4)
 		model.wv.save_word2vec_format('./temp_embeddings_file.emb')
