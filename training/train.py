@@ -40,7 +40,7 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 	return embeddings
 
 
-def run_training(args, device):
+def run_training(args):
 	# df = pd.read_csv('./data/reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
 	df = pd.read_csv(args["directory"]+'/'+args["graph_file"], header=None, names=['source', 'target', 'weight'])
 	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())

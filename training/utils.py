@@ -30,7 +30,7 @@ def make_filepath(args):
 
 
 arguments = ['embedder', 'embedding_dim', 'embedding_seed', 'embedding_lr', 'walk_length', 'num_walks', 'window', 'p', 'q']
-embed_args = [["node2vec", "line", "rolx"],
+embed_args = [["rolx"],#["node2vec", "line", "rolx"],
 		[32, 64, 96, 128, 256, 512],
 		[1234, 4321],
 		[0.001, 0.005, 0.01, 0.05, 0.0001]]

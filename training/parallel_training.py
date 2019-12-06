@@ -11,7 +11,7 @@ num_tests = max_tests
 seen = {}
 # num_devices = 4
 threads = []
-max_threads
+max_threads = 1
 # max_threads_per_device = 1
 curr_device = 0
 # device_counters = [0]*num_devices
