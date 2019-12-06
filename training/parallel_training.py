@@ -77,7 +77,7 @@ while(num_tests > 0):
 				new_args = create_args(device=device)
 
 			seen[str(new_args[:-2])] = True
-			threads[device].append(Thread(target=run_new, args=new_args))
+			threads[device].append(Thread(target=main, args=new_args))
 			print("Starting thread")
 			threads[device][-1].start()
 			num_tests-=1
