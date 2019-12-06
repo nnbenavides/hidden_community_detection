@@ -8,13 +8,13 @@ def node2vec_embedder(embedding_file):
 	line = f.readline()
 	line = f.readline()
 	while(line):
-	    if line[0] == ' ': line = line[1:]
-	    line = line.split(' ')
-	    # key = int(line[0])
-	    embedding = [float(x) for x in line[1:]]
-	    embeddings[str(int(line[0]))] = embedding
-	    line = f.readline()
-	    
+		if line[0] == ' ': line = line[1:]
+		line = line.split(' ')
+		# key = int(line[0])
+		embedding = [float(x) for x in line[1:]]
+		embeddings[str(int(line[0]))] = embedding
+		line = f.readline()
+		
 	return embeddings
 
 
@@ -41,15 +41,15 @@ node2vecs = [[10, 20, 30, 40, 50],
 			  [.2, .4, .6, .8, 1.0], 
 			  [.2, .4, .6, .8, 1.0]]
 # embed_args = [['node2vec', 'line'],
-# 		[15, 24, 32, 64, 96, 128, 256, 512, 1024],
-# 		[1234, 4321],
-# 		[0.001, 0.005, 0.01, 0.05, 0.0001]]
+#       [15, 24, 32, 64, 96, 128, 256, 512, 1024],
+#       [1234, 4321],
+#       [0.001, 0.005, 0.01, 0.05, 0.0001]]
 
 # node2vecs = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100], 
-# 				[20, 40, 60, 80, 100, 150, 200, 300, 400], 
-# 				[5, 10, 20, 40, 60, 80, 100], 
-# 				[.2, .4, .6, .8, 1.0], 
-# 				[.2, .4, .6, .8, 1.0]]
+#               [20, 40, 60, 80, 100, 150, 200, 300, 400], 
+#               [5, 10, 20, 40, 60, 80, 100], 
+#               [.2, .4, .6, .8, 1.0], 
+#               [.2, .4, .6, .8, 1.0]]
 
 nn_args = [[False, True, True, True],[None, .25, .5]]
 layer_choices = [[2, 3, 4, 5, 6, 8], [1, 2, 3]]
