@@ -30,7 +30,7 @@ def make_filepath(args):
 
 
 arguments = ['embedder', 'embedding_dim', 'embedding_seed', 'embedding_lr', 'walk_length', 'num_walks', 'window', 'p', 'q']
-embed_args = [["node2vec", "rolx"],
+embed_args = [["line"],#["node2vec", "line", "rolx"],
 		[32, 64, 96, 128, 256, 512],
 		[1234, 4321],
 		[0.001, 0.01, 0.05, 0.0001]]
@@ -54,7 +54,7 @@ node2vecs = [[10, 20, 30, 40, 50],
 nn_args = [[False, True, True, True],[None, .25, .5]]
 layer_choices = [[2, 3, 4, 5, 6, 8], [1, 2, 3]]
 
-def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embedding_batch_size=1024, embedding_epochs=250):
+def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embedding_batch_size=124, embedding_epochs=250):
 	embedder = choice(embed_args[0])
 
 	embedding_dim = 96 if embedder == "rolx" else choice(embed_args[1])
