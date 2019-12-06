@@ -31,10 +31,11 @@ class Dataset:
 		cols = ['src' + str(i) for i in range(embedding_dim)] + ['dst' + str(i) for i in range(embedding_dim)] + ['label']
 		df = pd.DataFrame(all_examples, columns = cols)
 		df.reset_index()
-		temp_mask = np.random.rand(df.shape[0])
-		train_mask = (temp_mask < .9)
-		test_mask = (temp_mask >= .9)
-		self.columns = df.columns
+		df = df.sample(frac=1)
+		# temp_mask = np.random.rangeand(df.shape[0])
+		# train_mask = (temp_mask < .9)
+		# test_mask = (temp_mask >= .9)
+		# self.columns = df.columns
 		self.train_df = df[train_mask]
 		self.test_df = df[test_mask]
 

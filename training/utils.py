@@ -19,9 +19,6 @@ def node2vec_embedder(embedding_file):
 
 
 def make_filepath(args):
-	print(args["num_walks"])
-	print(args["walk_length"])
-	print(args["window"])
 	node2vecstr = ('_numwalks-%d_walklength-%d_window-%d' % (args["num_walks"], args["walk_length"], args["window"])) if args["embedder"].lower()=='node2vec' else ''
 	embedd_str = '-dimension-%d_lr-%.4f_seed-%d_epochs-%d%s' % (args["embedding_dim"], args["embedding_lr"], args["embedding_seed"], args["embedding_epochs"], node2vecstr) if args["embedder"].lower() != 'rolx' else ''
 	layer_str = ''.join([str(d)+'+' for d in args["layers"]])
@@ -33,7 +30,7 @@ def make_filepath(args):
 
 
 arguments = ['embedder', 'embedding_dim', 'embedding_seed', 'embedding_lr', 'walk_length', 'num_walks', 'window', 'p', 'q']
-embed_args = [["rolx"],#["node2vec", "line", "rolx"],
+embed_args = [["node2vec", "rolx"],
 		[32, 64, 96, 128, 256, 512],
 		[1234, 4321],
 		[0.001, 0.005, 0.01, 0.05, 0.0001]]
@@ -65,9 +62,9 @@ def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv',
 	embedding_lr = choice(embed_args[3])
 	p = 1.0 if embedder != "node2vec" else choice(node2vecs[3])
 	q = 1.0 if embedder != "node2vec" else choice(node2vecs[4])
-	walk_length = 10 if embedder != "node2vec" else node2vecs[0]
-	num_walks = 10 if embedder != "node2vec" else node2vecs[1]
-	window = 10 if embedder != "node2vec" else node2vecs[2]
+	walk_length = 10 if embedder != "node2vec" else choice(node2vecs[0])
+	num_walks = 10 if embedder != "node2vec" else choice(node2vecs[1])
+	window = 10 if embedder != "node2vec" else choice(node2vecs[2])
 	workers = 1
 	dense = choice(nn_args[0])
 	dropout = choice(nn_args[1]) if dense else None

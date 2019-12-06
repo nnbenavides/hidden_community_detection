@@ -70,4 +70,4 @@ class Classifier:
 
 		loss = self.model.evaluate(x=test_embeddings, y=test_labels)
 
-		print("Best model has test accuracy: %.4f and test loss %.4f" % (loss, acc))
+		print("Best model has test accuracy: %.4f and test loss %.4f" % loss)
