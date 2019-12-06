@@ -19,7 +19,10 @@ def node2vec_embedder(embedding_file):
 
 
 def make_filepath(args):
-	node2vecstr = '_numwalks-%d_walklength-%d_window-%d' % (args["num_walks"], args["walk_length"], args["window"]) if args["embedder"].lower()=='node2vec' else ''
+	print(args["num_walks"])
+	print(args["walk_length"])
+	print(args["window"])
+	node2vecstr = ('_numwalks-%d_walklength-%d_window-%d' % (args["num_walks"], args["walk_length"], args["window"])) if args["embedder"].lower()=='node2vec' else ''
 	embedd_str = '-dimension-%d_lr-%.4f_seed-%d_epochs-%d%s' % (args["embedding_dim"], args["embedding_lr"], args["embedding_seed"], args["embedding_epochs"], node2vecstr) if args["embedder"].lower() != 'rolx' else ''
 	layer_str = ''.join([str(d)+'+' for d in args["layers"]])
 	nn_str = ('dense_' if args["dense_classifier"] else 'rnn_') + ('dropout-%.2f_' % args["dropout"] if args["dropout"] is not None else '') + 'layers-%s' % layer_str[:-1]
