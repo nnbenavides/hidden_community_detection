@@ -21,7 +21,7 @@ def check_threads(threads):
 	# count = 0
 	devices = []
 	for i in range(len(threads)):
-		for j in reversed(range(len(threads[inner]))):
+		for j in reversed(range(len(threads[i]))):
 			if not threads[i][j].is_alive():
 				del threads[i][j]
 				devices.append(i)
