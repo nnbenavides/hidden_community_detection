@@ -41,7 +41,7 @@ print("Starting threads")
 # for t in range(max_threads):
 for device in range(len(threads)):
 	for j in range(max_threads_per_device):
-		new_args[:-1] = create_args(device=device)
+		new_args = create_args(device=device)
 		while new_args[:-1] in seen:
 			new_args = create_args(device=device)
 
