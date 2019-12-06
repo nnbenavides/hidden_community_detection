@@ -9,7 +9,7 @@ from train import main
 max_tests = 1000
 num_tests = max_tests
 seen = {}
-num_devices = 1
+num_devices = 4
 threads = [[]]*num_devices
 max_threads_per_device = 1
 curr_device = 0

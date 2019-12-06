@@ -55,7 +55,7 @@ class Classifier:
 	def train(self, filepath, patience=10, validation_split=.2, batch_size=120, epochs=250, train_data=None, test_data=None):
 		print('here at train')
 		train_embeddings, train_labels = train_data
-		checkpointing = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+		checkpointing = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='max')
 		halting = EarlyStopping(monitor='val_loss', patience=patience, mode='auto', restore_best_weights=True)
 		callbacks = [checkpointing, halting]
 		self.model.fit(x=train_embeddings, y=train_labels,
