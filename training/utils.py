@@ -30,7 +30,7 @@ def make_filepath(args):
 
 
 arguments = ['embedder', 'embedding_dim', 'embedding_seed', 'embedding_lr', 'walk_length', 'num_walks', 'window', 'p', 'q']
-embed_args = [["line"],#["node2vec", "line", "rolx"],
+embed_args = [["node2vec"],#, "line", "rolx"],
 		[32, 64, 96, 128, 256, 512],
 		[1234, 4321],
 		[0.001, 0.01, 0.05, 0.0001]]
@@ -86,7 +86,6 @@ def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv',
 layer1 = [32, 64, 128, 256, 512]
 
 def gen_layers(layers, dense):
-	
 	start = choice(layer1)
 	while(dense and layers > 4 and start < 256):
 		start = choice(layer1)

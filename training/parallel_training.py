@@ -83,7 +83,6 @@ while(num_tests > 0):
 			print("Starting thread")
 			threads[-1].start()
 			num_tests-=1
-
 	else:
 		continue
 		
