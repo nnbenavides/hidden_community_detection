@@ -54,7 +54,7 @@ node2vecs = [[10, 20, 30, 40, 50],
 nn_args = [[False, True, True, True],[None, .25, .5]]
 layer_choices = [[2, 3, 4, 5, 6, 8], [1, 2, 3]]
 
-def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embedding_batch_size=1024, embedding_epochs=250, device=-1):
+def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embedding_batch_size=1024, embedding_epochs=250):
 	assert(device!=-1)
 
 	
@@ -80,7 +80,7 @@ def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv',
 	temp_folder='temp_folder'
 	args = (directory, embedder, graph_file, embedding_batch_size, embedding_epochs, embedding_dim, 
 		embedding_seed, embedding_lr, p, q, walk_length, num_walks, window, workers, dropout, layers, dense, 
-		patience, validation_split, batch_size, epochs, temp_folder, device,)
+		patience, validation_split, batch_size, epochs, temp_folder, )
 
 	return args
 
