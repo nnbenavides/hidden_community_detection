@@ -40,14 +40,18 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 	return embeddings
 
 
-def run_training(args):
+def run_training(args, device):
 	# df = pd.read_csv('./data/reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
 	df = pd.read_csv(args["directory"]+'/'+args["graph_file"], header=None, names=['source', 'target', 'weight'])
 	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
 	# G = nx.complete_graph(100)
 	full_filepath, embedd_str = make_filepath(args)
 	os.mkdir(args["directory"]+'/'+full_filepath)
+	os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+	os.environ["CUDA_VISIBLE_DEVICES"]=("%d" % device)
 
+	config = tf.ConfigProto(device_count = {'GPU': device})
+	sess = tf.Session(config=config)
 	save_embeddings = True
 	if not os.path.isdir(args["directory"]+'/embeddings'):
 		os.mkdir(args["directory"]+'/embeddings')
@@ -129,9 +133,6 @@ def main(directory='./data',
 				epochs=1000,
 				temp_folder='temp_folder', 
 				device=0):
-
-	os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-	os.environ["CUDA_VISIBLE_DEVICES"]=("%d" % device)
 	
 	args = {'directory':directory,
 				'embedder':embedder, 
@@ -156,7 +157,7 @@ def main(directory='./data',
 				'epochs':epochs,
 				'temp_folder':temp_folder}
 
-	run_training(args)
+	run_training(args, device)
 # if __name__=='__main__':
 	# main(args)
 

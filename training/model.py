@@ -52,7 +52,7 @@ class Classifier:
 
 
 
-	def train(self, filepath, patience=10, validation_split=.2, batch_size=120, epochs=250, train_data=None, test_data=None):
+	def train(self, filepath, patience=10, validation_split=.2, batch_size=120, epochs=250, train_data=None, test_data=None, use_gpu=True):
 		print('here at train')
 		train_embeddings, train_labels = train_data
 		checkpointing = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='max')
