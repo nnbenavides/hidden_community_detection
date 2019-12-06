@@ -80,7 +80,7 @@ def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv',
 	temp_folder='temp_folder'
 	args = (directory, embedder, graph_file, embedding_batch_size, embedding_epochs, embedding_dim, 
 		embedding_seed, embedding_lr, p, q, walk_length, num_walks, window, workers, dropout, layers, dense, 
-		patience, validation_split, batch_size, epochs, temp_folder,)
+		patience, validation_split, batch_size, epochs, temp_folder, device,)
 
 	return args
 
