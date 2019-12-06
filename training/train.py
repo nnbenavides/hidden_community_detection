@@ -133,7 +133,8 @@ def main(directory='./data',
 	os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 	os.environ["CUDA_VISIBLE_DEVICES"]=("%d" % device)
 	
-	args = {'embedder':embedder, 
+	args = {'directory':directory,
+				'embedder':embedder, 
 				'graph_file':graph_file,
 				'embedding_batch_size':batch_size,
 				'embedding_epochs':embedding_epochs,
