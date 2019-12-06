@@ -128,7 +128,7 @@ def main(directory='./data',
 				batch_size=120,
 				epochs=1000,
 				temp_folder='temp_folder', 
-				device=0)
+				device=0):
 
 	os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 	os.environ["CUDA_VISIBLE_DEVICES"]=("%d" % device)
