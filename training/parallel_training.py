@@ -86,5 +86,5 @@ while(num_tests > 0):
 		continue
 		
 for device in threads:
-	for t in threads[device]
+	for t in threads[device]:
 		t.join()
