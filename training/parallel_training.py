@@ -9,9 +9,9 @@ from train import main
 max_tests = 1000
 num_tests = max_tests
 seen = {}
+num_devices = 1
 threads = [[]]*num_devices
 max_threads_per_device = 1
-num_devices = 2
 curr_device = 0
 # device_counters = [0]*num_devices
 
@@ -37,7 +37,7 @@ def check_threads(threads):
 # def run_new(args, curr_device):
 	# os.system('CUDA_VISIBLE_DEVICES=%d; python3 train.py %s' % (curr_device, args))
 
-print("Starting %d threads" % max_threads)
+print("Starting threads")
 # for t in range(max_threads):
 for device in range(len(threads)):
 	for j in range(max_threads_per_device):
@@ -60,7 +60,7 @@ for device in range(len(threads)):
 	
 	
 
-print("Finished starting %d threads, will spawn more as they die" % max_threads)
+print("Finished starting threads, will spawn more as they die")
 while(num_tests > 0):
 	sleep(15)
 	devices = check_threads(threads)
