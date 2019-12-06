@@ -51,11 +51,6 @@ def run_training(args, device):
 	# G = nx.complete_graph(100)
 	
 	os.mkdir(args["directory"]+'/'+full_filepath)
-	os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-	os.environ["CUDA_VISIBLE_DEVICES"]=("%d" % device)
-
-	config = tf.ConfigProto(device_count = {'GPU': device})
-	sess = tf.Session(config=config)
 	save_embeddings = True
 	if not os.path.isdir(args["directory"]+'/embeddings'):
 		os.mkdir(args["directory"]+'/embeddings')
@@ -135,8 +130,7 @@ def main(directory='./data',
 				validation_split=0.2,
 				batch_size=120,
 				epochs=1000,
-				temp_folder='temp_folder', 
-				device=0):
+				temp_folder='temp_folder'):
 	
 	args = {'directory':directory,
 				'embedder':embedder, 
@@ -161,7 +155,7 @@ def main(directory='./data',
 				'epochs':epochs,
 				'temp_folder':temp_folder}
 
-	run_training(args, device)
+	run_training(args)
 # if __name__=='__main__':
 	# main(args)
 
