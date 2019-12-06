@@ -44,10 +44,12 @@ def run_training(args, device):
 	# df = pd.read_csv('./data/reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
 	df = pd.read_csv(args["directory"]+'/'+args["graph_file"], header=None, names=['source', 'target', 'weight'])
 	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
+	full_filepath, embedd_str = make_filepath(args)
+	
 	filepath = args["directory"]+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
 	if os.path.isdir(filepath): return
 	# G = nx.complete_graph(100)
-	full_filepath, embedd_str = make_filepath(args)
+	
 	os.mkdir(args["directory"]+'/'+full_filepath)
 	os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 	os.environ["CUDA_VISIBLE_DEVICES"]=("%d" % device)
