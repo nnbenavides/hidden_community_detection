@@ -123,9 +123,9 @@ def main(directory='./data',
 				dropout=None,
 				layers=[128,64,32],
 				dense_classifier=True,
-				patience=10
-				validation_split=0.2
-				batch_size=120
+				patience=10,
+				validation_split=0.2,
+				batch_size=120,
 				epochs=1000,
 				temp_folder='temp_folder', device=0)
 
