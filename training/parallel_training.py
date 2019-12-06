@@ -44,10 +44,10 @@ print("Starting threads")
 	# for j in range(max_threads_per_device):
 for i in range(max_threads):
 	new_args = create_args()
-	while hash(new_args[:-1]) in seen:
+	while str(new_args[:-1]) in seen:
 		new_args = create_args()
 
-	seen[hash(new_args[:-1])] = True
+	seen[str(new_args[:-1])] = True
 	threads.append(Thread(target=main, args=new_args))
 	# curr_device += 1
 	# if curr_device == num_devices: curr_device = 0
@@ -75,10 +75,10 @@ while(num_tests > 0):
 					# if device_counters[i] < max_threads_per_device:
 						# device = i
 			new_args = create_args()
-			while hash(new_args[:-1]) in seen:
+			while str(new_args[:-1]) in seen:
 				new_args = create_args()
 
-			seen[hash(new_args[:-1])] = True
+			seen[str(new_args[:-1])] = True
 			threads.append(Thread(target=main, args=new_args))
 			print("Starting thread")
 			threads[-1].start()
