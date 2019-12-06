@@ -63,11 +63,11 @@ def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv',
 	embedding_dim = 96 if embedder == "rolx" else choice(embed_args[1])
 	embedding_seed = choice(embed_args[2])
 	embedding_lr = choice(embed_args[3])
-	p = None if embedder != "node2vec" else choice(node2vecs[3])
-	q = None if embedder != "node2vec" else choice(node2vecs[4])
-	walk_length = None if embedder != "node2vec" else node2vecs[0]
-	num_walks = None if embedder != "node2vec" else node2vecs[1]
-	window = None if embedder != "node2vec" else node2vecs[2]
+	p = 1.0 if embedder != "node2vec" else choice(node2vecs[3])
+	q = 1.0 if embedder != "node2vec" else choice(node2vecs[4])
+	walk_length = 10 if embedder != "node2vec" else node2vecs[0]
+	num_walks = 10 if embedder != "node2vec" else node2vecs[1]
+	window = 10 if embedder != "node2vec" else node2vecs[2]
 	workers = 1
 	dense = choice(nn_args[0])
 	dropout = choice(nn_args[1]) if dense else None
