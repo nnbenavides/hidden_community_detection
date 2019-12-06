@@ -127,7 +127,8 @@ def main(directory='./data',
 				validation_split=0.2,
 				batch_size=120,
 				epochs=1000,
-				temp_folder='temp_folder', device=0)
+				temp_folder='temp_folder', 
+				device=0)
 
 	os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 	os.environ["CUDA_VISIBLE_DEVICES"]=("%d" % device)
@@ -156,7 +157,7 @@ def main(directory='./data',
 
 	run_training(args)
 # if __name__=='__main__':
-	main(args)
+	# main(args)
 
 
 
