@@ -30,7 +30,7 @@ def make_filepath(args):
 
 
 arguments = ['embedder', 'embedding_dim', 'embedding_seed', 'embedding_lr', 'walk_length', 'num_walks', 'window', 'p', 'q']
-embed_args = [["line"],#["node2vec", "line", "rolx"],
+embed_args = [["node2vec", "rolx"],
 		[32, 64, 96, 128, 256, 512],
 		[1234, 4321],
 		[0.001, 0.01, 0.05, 0.0001]]
@@ -56,7 +56,6 @@ layer_choices = [[2, 3, 4, 5, 6, 8], [1, 2, 3]]
 
 def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embedding_batch_size=124, embedding_epochs=250):
 	embedder = choice(embed_args[0])
-
 	embedding_dim = 96 if embedder == "rolx" else choice(embed_args[1])
 	embedding_seed = choice(embed_args[2])
 	embedding_lr = choice(embed_args[3])
@@ -82,11 +81,26 @@ def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv',
 	return args
 
 
+def create_nn_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embeddings_directory='./data/embeddings'):
+	embedder_file = 'rolx_embeddings.json'
+	dense = choice(nn_args[0])
+	dropout = choice(nn_args[1]) if dense else None
+	layers = choice(layer_choices[0] if dense else layer_choices[1])
+	layers = gen_layers(layers, dense)
+	patience=10
+	validation_split=0.2
+	batch_size=120
+	epochs=1000
+	temp_folder='temp_folder'
+	args = (directory, embedder_file, graph_file, dropout, layers, dense, 
+		patience, validation_split, batch_size, epochs, )
+
+	return args
+	
 
 layer1 = [32, 64, 128, 256, 512]
 
 def gen_layers(layers, dense):
-	
 	start = choice(layer1)
 	while(dense and layers > 4 and start < 256):
 		start = choice(layer1)
