@@ -95,15 +95,8 @@ def get_q_prime_k(subgraph,graph,layer):
     n = len(graph)
     e_kk = subgraph.number_of_edges()
     d_k = sum([d for n,d in graph.degree(subgraph.nodes)])
-    if n_k*(n_k - 1) == 0:
-        p_k = e_kk
-    else:
-        p_k = 2*e_kk/(n_k*(n_k - 1))
-    if n_k*(n - n_k) == 0:
-        q_k = (d_k - 2*e_kk)/n
-        print("n-n_k or n_k is 0")
-    else:
-        q_k = (d_k - 2*e_kk)/(n_k*(n - n_k))
+    p_k = 2*e_kk/(n_k*(n_k - 1))
+    q_k = (d_k - 2*e_kk)/(n_k*(n - n_k))
     q_prime_k = q_k/p_k
     return q_prime_k
 
