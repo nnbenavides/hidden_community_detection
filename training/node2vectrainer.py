@@ -42,6 +42,7 @@ def run_training(args):
 	if args["embedder"].lower() != 'rolx':
 		embedd_str = args["embedder"] + '_' + embedd_str
 
+	print(embedd_str)
 	filepath = args["directory"]+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
 	if os.path.isdir(filepath): return
 	
