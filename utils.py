@@ -124,6 +124,8 @@ def reduceEdge(graph,layer):
     """
     relaxed_graph = graph.copy()
     for subgraph in layer:
+        if len(subgraph) == 1:
+            continue
         q_prime_k = get_q_prime_k(subgraph,graph,layer)
         edges_to_remove = [edge for edge in subgraph.edges if random.random() < (1-q_prime_k)]
         relaxed_graph.remove_edges_from(edges_to_remove)
@@ -148,11 +150,13 @@ def reduceWeight(graph,layer):
     """
     relaxed_graph = graph.copy()
     for subgraph in layer:
+        if len(subgraph) == 1:
+            continue
         q_prime_k = get_q_prime_k(subgraph,graph,layer)
         #print("q_prime_k",q_prime_k)
         for u, v, weight in relaxed_graph.edges.data('weight'):
             #print(q_prime_k,relaxed_graph.edges[u, v]['weight'])
-            relaxed_graph.edges[u, v]['weight'] *= (1+q_prime_k)
+            relaxed_graph.edges[u, v]['weight'] *= q_prime_k
     return relaxed_graph
 
 
