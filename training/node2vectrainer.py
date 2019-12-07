@@ -1,5 +1,4 @@
 from node2vec import Node2Vec
-from ge import LINE
 import networkx, os, argparse, json
 from dataloader import Dataset
 from model import Classifier
@@ -29,10 +28,8 @@ def embedding_trainer(G, embedder, epochs=250, seed=1234, learning_rate=0.05, em
 		model.wv.save_word2vec_format('./temp_embeddings_file.emb')
 		embeddings = node2vec_embedder('temp_embeddings_file.emb')
 		os.remove('./temp_embeddings_file.emb')
-	elif embedder == 'rolx':
-		# embeddings = np.load('./data/rolx_embeddings.npy')[()]
-		with open(args["directory+'/embeddings/rolx_embedding.json'"]) as fp:
-			embeddings = json.load(fp)
+	else:
+		assert(True)
 		# embeddings = {str(k):v for k,v in embeddings.items()}
 	return embeddings
 
@@ -54,9 +51,7 @@ def run_training(args):
 		os.mkdir(args["directory"]+'/embeddings')
 
 	if os.path.exists(args["directory"]+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json'):
-		save_embeddings = False
-		with open(args["directory"]+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'r') as fp:
-			embeddings = json.load(fp)
+		return
 		# embeddings = load(args["directory+'/'+embedd_str+'/embeddings.txt')
 	else:
 		embeddings = embedding_trainer(G=G, 
