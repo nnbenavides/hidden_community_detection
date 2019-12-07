@@ -45,14 +45,11 @@ def run_training(args):
 	filepath = args["directory"]+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
 	if os.path.isdir(filepath): return
 	
-	os.mkdir(args["directory"]+'/'+full_filepath)
-	save_embeddings = True
 	if not os.path.isdir(args["directory"]+'/embeddings'):
 		os.mkdir(args["directory"]+'/embeddings')
 
 	if os.path.exists(args["directory"]+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json'):
 		return
-		# embeddings = load(args["directory+'/'+embedd_str+'/embeddings.txt')
 	else:
 		embeddings = embedding_trainer(G=G, 
 									embedding_dim=args["embedding_dim"],
@@ -69,10 +66,9 @@ def run_training(args):
 									workers=args["workers"],
 									temp_folder=args["directory"]+'/'+args["temp_folder"])
 
-	if save_embeddings:
-		# os.mkdir(args["directory+'/embeddings/'+embedd_str+'embedding.json')
-		with open(args["directory"]+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'w') as fp:
-			json.dump(embeddings, fp)
+	
+	with open(args["directory"]+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'w') as fp:
+		json.dump(embeddings, fp)
 
 def main(directory='./data', 
 				embedder='node2vec', 

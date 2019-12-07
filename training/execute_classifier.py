@@ -1,9 +1,9 @@
 import os
 import numpy as np
-from utils import create_args
+from utils import create_nn_args
 from threading import Thread
 from time import sleep
-from node2vectrainer import main
+from train_classifier import main
 
 
 max_tests = 1000
@@ -15,7 +15,6 @@ curr_device = 0
 
 def check_threads(threads):
 	count = 0
-
 	for i in reversed(range(len(threads))):
 		if not threads[i].is_alive():
 			del threads[i]
@@ -24,14 +23,16 @@ def check_threads(threads):
 	return count
 
 print("Starting threads")
-for i in range(max_threads):
-	new_args = create_args()
-	while str(new_args[:-1]) in seen:
-		new_args = create_args()
 
-	seen[str(new_args[:-1])] = True
+for i in range(max_threads):
+	new_args = create_nn_args()
+	while str(new_args) in seen:
+		new_args = create_nn_args()
+
+	seen[str(new_args)] = True
 	threads.append(Thread(target=main, args=new_args))
 	threads[-1].start()
+	
 	num_tests-=1
 	
 	
@@ -43,11 +44,11 @@ while(num_tests > 0):
 	if count > 0:
 		for i in range(count):
 			if num_tests == 0: break
-			new_args = create_args()
-			while str(new_args[:-1]) in seen:
-				new_args = create_args()
+			new_args = create_nn_args()
+			while str(new_args) in seen:
+				new_args = create_nn_args()
 
-			seen[str(new_args[:-1])] = True
+			seen[str(new_args)] = True
 			threads.append(Thread(target=main, args=new_args))
 			print("Starting thread")
 			threads[-1].start()

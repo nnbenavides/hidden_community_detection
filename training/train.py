@@ -84,8 +84,7 @@ def run_training(args):
 		# os.mkdir(args["directory+'/embeddings/'+embedd_str+'embedding.json')
 		with open(args["directory"]+'/embeddings/'+(embedd_str if embedd_str != '' else 'rolx')+'_embedding.json', 'w') as fp:
 			json.dump(embeddings, fp)
-	# print(args["layers)
-	# print(embeddings)
+
 	data = Dataset(embeddings=embeddings, G=G, directory=args["directory"], graph_file=args["graph_file"], embedding_dim=args["embedding_dim"])
 
 	classifier = Classifier(dense_classifier=args["dense_classifier"],
