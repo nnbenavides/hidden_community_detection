@@ -47,6 +47,8 @@ def run_training(args):
 	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
 	full_filepath, embedd_str = make_filepath(args)
 	
+	if args["embedder"].lower() != 'rolx':
+		embedd_str = args["embedder"] + '_' + embedd_str
 	filepath = args["directory"]+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
 	if os.path.isdir(filepath): return
 	# G = nx.complete_graph(100)
