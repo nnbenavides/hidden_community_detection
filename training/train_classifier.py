@@ -21,7 +21,7 @@ def run_training(args):
 	full_filepath = nn_filepath(args)
 	
 	filepath = args["directory"]+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
-	if os.path.isdir(args["directory"]+'/'full_filepath): return
+	if os.path.isdir(args["directory"]+'/'+full_filepath): return
 	
 	os.mkdir(args["directory"]+'/'+full_filepath)
 
