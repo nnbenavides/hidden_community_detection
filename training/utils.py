@@ -1,5 +1,6 @@
 import numpy as np
 from random import choice
+import os
 
 def node2vec_embedder(embedding_file):
 	embeddings = {}
@@ -18,16 +19,20 @@ def node2vec_embedder(embedding_file):
 	return embeddings
 
 
+def nn_filepath(args):
+	layer_str = ''.join([str(d)+'+' for d in args["layers"]])
+	nn_str = ('dense_' if args["dense_classifier"] else 'rnn_') + ('dropout-%.2f_' % args["dropout"] if args["dropout"] is not None else '') + 'layers-%s' % layer_str[:-1]
+	full_filepath = '%s_NN-%s' % (args["embedding_file"][:-16], nn_str)
+	return full_filepath
+
 def make_filepath(args):
 	node2vecstr = ('_numwalks-%d_walklength-%d_window-%d' % (args["num_walks"], args["walk_length"], args["window"])) if args["embedder"].lower()=='node2vec' else ''
-	embedd_str = '-dimension-%d_lr-%.4f_seed-%d_epochs-%d%s' % (args["embedding_dim"], args["embedding_lr"], args["embedding_seed"], args["embedding_epochs"], node2vecstr) if args["embedder"].lower() != 'rolx' else ''
+	embedd_str = 'dimension-%d_lr-%.4f_seed-%d_epochs-%d%s' % (args["embedding_dim"], args["embedding_lr"], args["embedding_seed"], args["embedding_epochs"], node2vecstr) if args["embedder"].lower() != 'rolx' else ''
 	layer_str = ''.join([str(d)+'+' for d in args["layers"]])
 	nn_str = ('dense_' if args["dense_classifier"] else 'rnn_') + ('dropout-%.2f_' % args["dropout"] if args["dropout"] is not None else '') + 'layers-%s' % layer_str[:-1]
 	full_filepath = '%s%s_NN-%s' % (args["embedder"].lower(), embedd_str, nn_str)
 
 	return full_filepath, embedd_str
-
-
 
 arguments = ['embedder', 'embedding_dim', 'embedding_seed', 'embedding_lr', 'walk_length', 'num_walks', 'window', 'p', 'q']
 embed_args = [["node2vec", "rolx"],
@@ -40,19 +45,9 @@ node2vecs = [[10, 20, 30, 40, 50],
 			  [5, 10, 20], 
 			  [.2, .4, .6, .8, 1.0], 
 			  [1, 2, 3, 4, 5]]
-# embed_args = [['node2vec', 'line'],
-#       [15, 24, 32, 64, 96, 128, 256, 512, 1024],
-#       [1234, 4321],
-#       [0.001, 0.005, 0.01, 0.05, 0.0001]]
-
-# node2vecs = [[10, 20, 30, 40, 50, 60, 70, 80, 90, 100], 
-#               [20, 40, 60, 80, 100, 150, 200, 300, 400], 
-#               [5, 10, 20, 40, 60, 80, 100], 
-#               [.2, .4, .6, .8, 1.0], 
-#               [.2, .4, .6, .8, 1.0]]
 
 nn_args = [[False, True, True, True],[None, .25, .5]]
-layer_choices = [[2, 3, 4, 5, 6, 8], [1, 2, 3]]
+layer_choices = [[2, 3, 4, 5, 6], [1, 2, 3]]
 
 def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embedding_batch_size=124, embedding_epochs=250):
 	embedder = choice(embed_args[0])
@@ -80,9 +75,17 @@ def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv',
 
 	return args
 
-
-def create_nn_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embeddings_directory='./data/embeddings'):
-	embedder_file = 'rolx_embeddings.json'
+from os import listdir
+from os.path import isfile, join
+# onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+def create_nn_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embeddings_directory='./data/embeddings/'):
+	embedder_files = [f for f in listdir(embeddings_directory)]
+	embedder_file = choice(embedder_files)
+	while(not embedder_file.endswith('.json')):
+		embedder_file = choice(embedder_files)
+	print(embedder_file)
+	dim_idx = embedder_file.find('dimension-')+10
+	embedding_dim = 96 if embedder_file == "rolx_embeddings.json" else int(embedder_file[dim_idx:][:embedder_file[dim_idx:].find('_')])
 	dense = choice(nn_args[0])
 	dropout = choice(nn_args[1]) if dense else None
 	layers = choice(layer_choices[0] if dense else layer_choices[1])
@@ -92,14 +95,13 @@ def create_nn_args(directory='./data', graph_file='reddit_nodes_weighted_full.cs
 	batch_size=120
 	epochs=1000
 	temp_folder='temp_folder'
-	args = (directory, embedder_file, graph_file, dropout, layers, dense, 
-		patience, validation_split, batch_size, epochs, )
+	args = (directory, embedder_file, embedding_dim, graph_file, dropout, layers, dense, 
+		patience, validation_split, batch_size, epochs,)
 
 	return args
 	
 
 layer1 = [32, 64, 128, 256, 512]
-
 def gen_layers(layers, dense):
 	start = choice(layer1)
 	while(dense and layers > 4 and start < 256):

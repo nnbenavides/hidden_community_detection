@@ -3,25 +3,27 @@ from ge import LINE
 import networkx, os, argparse, json
 from dataloader import Dataset
 from model import Classifier
-from utils import node2vec_embedder, make_filepath
+from utils import node2vec_embedder, nn_filepath
 from tensorflow import set_random_seed
 import numpy as np
 import tensorflow as tf
 import pandas as pd
 import networkx as nx
 
-np.random.seed(2019)
-tf.compat.v1.set_random_seed(2019)
-
 
 def run_training(args):
+	config = tf.ConfigProto()
+	config.gpu_options.allow_growth = True
+	session = tf.Session(config=config)
+	np.random.seed(2019)
+	tf.compat.v1.set_random_seed(2019)
 	# df = pd.read_csv('./data/reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
 	df = pd.read_csv(args["directory"]+'/'+args["graph_file"], header=None, names=['source', 'target', 'weight'])
 	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
-	full_filepath, embedd_str = make_filepath(args)
+	full_filepath = nn_filepath(args)
 	
 	filepath = args["directory"]+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
-	if os.path.isdir(filepath): return
+	if os.path.isdir(args["directory"]+'/'+full_filepath): return
 	
 	os.mkdir(args["directory"]+'/'+full_filepath)
 
@@ -53,9 +55,9 @@ def run_training(args):
 					train_data=train_data, 
 					test_data=test_data)
 
-def main(directory='./data', 
-				embedder='node2vec', 
+def main(directory='./data',  
 				embedding_file='rolx_embeddings.json',
+				embedding_dim=96,
 				graph_file='reddit_nodes_weighted_full.csv',
 				dropout=None,
 				layers=[128,64,32],
@@ -64,9 +66,10 @@ def main(directory='./data',
 				validation_split=0.2,
 				batch_size=120,
 				epochs=1000):
-	
+
 	args = {'directory':directory,
 				'embedding_file': embedding_file,
+				'embedding_dim': embedding_dim,
 				'graph_file':graph_file,
 				'dropout':dropout,
 				'layers':layers,
@@ -74,8 +77,7 @@ def main(directory='./data',
 				'patience':patience,
 				'validation_split':validation_split,
 				'batch_size':batch_size,
-				'epochs':epochs,
-				'temp_folder':temp_folder}
+				'epochs':epochs}
 
 	run_training(args)
 # if __name__=='__main__':
