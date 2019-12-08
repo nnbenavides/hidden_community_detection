@@ -219,4 +219,28 @@ def hicode(G, num_layers = 1):
 
     R_t /= num_iters*Q_0
 
-    return R_t, G_curr
+    return R_t, G_curr, layers
+
+def reverse_dict(partition):
+    # reverse the dict
+    comms = dict(partition)
+    reverse_comms = {}
+    for key, val in comms.items():
+        reverse_comms[val] = reverse_comms.get(val, []) + [key]
+    print(len(reverse_comms.keys()))
+    return reverse_comms
+
+def load_nodes_mapping():
+    # Load nodes mapping
+    nodes_mapping = np.load('data/reverse_nodes_mapping.npy', allow_pickle = True)
+    nodes_mapping = nodes_mapping.item()
+    return nodes_mapping
+
+def write_results_to_file(reverse_comms,nodes_mapping,filename):
+    # Write results to file
+    f = open('results/'+filename+'.txt', 'a')
+    for cmty, nodes in reverse_comms.items():
+        f.write("Community %d:\n" % cmty)
+        for node in nodes:
+            f.write(nodes_mapping[node] + "\n")
+        f.write("\n")
