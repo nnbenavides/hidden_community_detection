@@ -3,7 +3,7 @@ from ge import LINE
 import networkx, os, argparse, json
 from dataloader import Dataset
 from model import Classifier
-from utils import node2vec_embedder, make_filepath
+from utils import node2vec_embedder, nn_filepath
 from tensorflow import set_random_seed
 import numpy as np
 import tensorflow as tf
@@ -18,10 +18,10 @@ def run_training(args):
 	# df = pd.read_csv('./data/reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
 	df = pd.read_csv(args["directory"]+'/'+args["graph_file"], header=None, names=['source', 'target', 'weight'])
 	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
-	full_filepath, embedd_str = make_filepath(args)
+	full_filepath = nn_filepath(args)
 	
 	filepath = args["directory"]+'/'+full_filepath+'/checkpoint_{epoch:02d}-{val_loss:.5f}.hdf5'
-	if os.path.isdir(filepath): return
+	if os.path.isdir(args["directory"]+'/'full_filepath): return
 	
 	os.mkdir(args["directory"]+'/'+full_filepath)
 
