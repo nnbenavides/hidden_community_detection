@@ -55,6 +55,7 @@ def run_training(args):
 
 def main(directory='./data',  
 				embedding_file='rolx_embeddings.json',
+				embedding_dim=96,
 				graph_file='reddit_nodes_weighted_full.csv',
 				dropout=None,
 				layers=[128,64,32],
@@ -66,6 +67,7 @@ def main(directory='./data',
 
 	args = {'directory':directory,
 				'embedding_file': embedding_file,
+				'embedding_dim': embedding_dim
 				'graph_file':graph_file,
 				'dropout':dropout,
 				'layers':layers,
