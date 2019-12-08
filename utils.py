@@ -97,6 +97,7 @@ def get_q_prime_k(subgraph,graph,layer):
     d_k = sum([d for n,d in graph.degree(subgraph.nodes)])
     p_k = 2*e_kk/(n_k*(n_k - 1))
     q_k = (d_k - 2*e_kk)/(n_k*(n - n_k))
+    print(n,n_k,d_k,e_kk,q_k,p_k)
     q_prime_k = q_k/p_k
     return q_prime_k
 
@@ -117,7 +118,7 @@ def reduceEdge(graph,layer):
     """
     relaxed_graph = graph.copy()
     for subgraph in layer:
-        if len(subgraph) == 1:
+        if len(subgraph) <= 100:
             continue
         q_prime_k = get_q_prime_k(subgraph,graph,layer)
         edges_to_remove = [edge for edge in subgraph.edges if random.random() < (1-q_prime_k)]
@@ -143,10 +144,10 @@ def reduceWeight(graph,layer):
     """
     relaxed_graph = graph.copy()
     for subgraph in layer:
-        if len(subgraph) == 1:
+        if len(subgraph) <= 100:
             continue
         q_prime_k = get_q_prime_k(subgraph,graph,layer)
-        #print("q_prime_k",q_prime_k)
+        print("q_prime_k",q_prime_k)
         for u, v, weight in relaxed_graph.edges.data('weight'):
             #print(q_prime_k,relaxed_graph.edges[u, v]['weight'])
             relaxed_graph.edges[u, v]['weight'] *= q_prime_k
@@ -188,8 +189,8 @@ def refinement(layers,G):
             G_reduced = reduceWeight(G_reduced,layers[j])
         partition = louvain(G_reduced)
         m = modularity(partition,G_reduced)
-        output_layers.append(partition_to_layer(partition,G_reduced))
-    return output_layers, G_reduced
+        output_layers.append(partition_to_layer(partition,G))
+    return output_layers
 
 def hicode(G, num_layers = 1):
     #Identification
@@ -209,12 +210,13 @@ def hicode(G, num_layers = 1):
     #refinement
     print("Refinement")
     R_t = 0
-    for i in range(10):
+    num_iters = 5
+    for i in range(num_iters):
         print(i)
-        layers, G_curr = refinement(layers,G_curr)
+        layers = refinement(layers,G_curr)
         Q = average_modularity(layers,G_curr)
         R_t += Q
 
-    R_t /= 10*Q_0
+    R_t /= num_iters*Q_0
 
     return R_t, G_curr
