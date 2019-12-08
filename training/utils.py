@@ -81,12 +81,11 @@ from os.path import isfile, join
 def create_nn_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embeddings_directory='./data/embeddings/'):
 	embedder_files = [f for f in listdir(embeddings_directory)]
 	embedder_file = choice(embedder_files)
-	dim_idx = embedder_file.find('dimension-')+10
-	embedding_dim = 96 if embedder_file == "rolx_embeddings.json" else int(embedder_file[dim_idx:][:embedder_file[dim_idx:].find('_')])
-	embedder_file.find('dimension')
-	print(embedder_file)
 	while(not embedder_file.endswith('.json')):
 		embedder_file = choice(embedder_files)
+	print(embedder_file)
+	dim_idx = embedder_file.find('dimension-')+10
+	embedding_dim = 96 if embedder_file == "rolx_embeddings.json" else int(embedder_file[dim_idx:][:embedder_file[dim_idx:].find('_')])
 	dense = choice(nn_args[0])
 	dropout = choice(nn_args[1]) if dense else None
 	layers = choice(layer_choices[0] if dense else layer_choices[1])
