@@ -97,7 +97,7 @@ def get_q_prime_k(subgraph,graph,layer):
     d_k = sum([d for n,d in graph.degree(subgraph.nodes)])
     p_k = 2*e_kk/(n_k*(n_k - 1))
     q_k = (d_k - 2*e_kk)/(n_k*(n - n_k))
-    print(n,n_k,d_k,e_kk,q_k,p_k)
+    #print(n,n_k,d_k,e_kk,q_k,p_k)
     q_prime_k = q_k/p_k
     return q_prime_k
 
@@ -147,7 +147,7 @@ def reduceWeight(graph,layer):
         if len(subgraph) <= 100:
             continue
         q_prime_k = get_q_prime_k(subgraph,graph,layer)
-        print("q_prime_k",q_prime_k)
+        #print("q_prime_k",q_prime_k)
         for u, v, weight in relaxed_graph.edges.data('weight'):
             #print(q_prime_k,relaxed_graph.edges[u, v]['weight'])
             relaxed_graph.edges[u, v]['weight'] *= q_prime_k
