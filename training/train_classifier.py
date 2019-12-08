@@ -10,11 +10,13 @@ import tensorflow as tf
 import pandas as pd
 import networkx as nx
 
-np.random.seed(2019)
-tf.compat.v1.set_random_seed(2019)
-
 
 def run_training(args):
+	config = tf.ConfigProto()
+	config.gpu_options.allow_growth = True
+	session = tf.Session(config=config)
+	np.random.seed(2019)
+	tf.compat.v1.set_random_seed(2019)
 	# df = pd.read_csv('./data/reddit_nodes_weighted_full.csv', header=None, names=['source', 'target', 'weight'])
 	df = pd.read_csv(args["directory"]+'/'+args["graph_file"], header=None, names=['source', 'target', 'weight'])
 	G = nx.from_pandas_edgelist(df, edge_attr='weight', create_using=nx.Graph())
@@ -67,7 +69,7 @@ def main(directory='./data',
 
 	args = {'directory':directory,
 				'embedding_file': embedding_file,
-				'embedding_dim': embedding_dim
+				'embedding_dim': embedding_dim,
 				'graph_file':graph_file,
 				'dropout':dropout,
 				'layers':layers,
