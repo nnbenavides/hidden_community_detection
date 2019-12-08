@@ -23,7 +23,7 @@ def nn_filepath(args):
 	layer_str = ''.join([str(d)+'+' for d in args["layers"]])
 	nn_str = ('dense_' if args["dense_classifier"] else 'rnn_') + ('dropout-%.2f_' % args["dropout"] if args["dropout"] is not None else '') + 'layers-%s' % layer_str[:-1]
 	full_filepath = '%s_NN-%s' % (args["embedding_file"][:-16], nn_str)
-
+	return full_filepath
 
 def make_filepath(args):
 	node2vecstr = ('_numwalks-%d_walklength-%d_window-%d' % (args["num_walks"], args["walk_length"], args["window"])) if args["embedder"].lower()=='node2vec' else ''
@@ -94,7 +94,7 @@ def create_nn_args(directory='./data', graph_file='reddit_nodes_weighted_full.cs
 	epochs=1000
 	temp_folder='temp_folder'
 	args = (directory, embedder_file, graph_file, dropout, layers, dense, 
-		patience, validation_split, batch_size, epochs, )
+		patience, validation_split, batch_size, epochs,)
 
 	return args
 	
