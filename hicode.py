@@ -20,11 +20,14 @@ nx.write_weighted_edgelist(G_weighted, 'results/G2_weighted.edgelist')
 nodes_mapping = utils.load_nodes_mapping()
 partitions = []
 for num_layer, layer in enumerate(layers_2):
-    community_count = 0
+    print("community_count",len(layer))
+    revised_community_count = 0
     for i,subgraph in enumerate(layer):
         if len(subgraph.nodes) > 100:
-            community_count += 1
-    print("community_count",community_count)
+            revised_community_count += 1
+    print("revised_community_count",revised_community_count)
+
+
     partition = utils.layer_to_partition(layer,G_weighted)
     print("layer number ", num_layer + 1)
     print(utils.modularity(partition,G_weighted))
