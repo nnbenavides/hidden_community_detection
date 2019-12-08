@@ -53,8 +53,7 @@ def run_training(args):
 					train_data=train_data, 
 					test_data=test_data)
 
-def main(directory='./data', 
-				embedder='node2vec', 
+def main(directory='./data',  
 				embedding_file='rolx_embeddings.json',
 				graph_file='reddit_nodes_weighted_full.csv',
 				dropout=None,
@@ -64,7 +63,7 @@ def main(directory='./data',
 				validation_split=0.2,
 				batch_size=120,
 				epochs=1000):
-	
+
 	args = {'directory':directory,
 				'embedding_file': embedding_file,
 				'graph_file':graph_file,
@@ -74,8 +73,7 @@ def main(directory='./data',
 				'patience':patience,
 				'validation_split':validation_split,
 				'batch_size':batch_size,
-				'epochs':epochs,
-				'temp_folder':temp_folder}
+				'epochs':epochs}
 
 	run_training(args)
 # if __name__=='__main__':
