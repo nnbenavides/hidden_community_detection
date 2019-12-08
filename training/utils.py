@@ -77,8 +77,8 @@ def create_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv',
 
 from os import listdir
 from os.path import isfile, join
-onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-def create_nn_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embeddings_directory='./data/embeddings'):
+# onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+def create_nn_args(directory='./data', graph_file='reddit_nodes_weighted_full.csv', embeddings_directory='./data/embeddings/'):
 	embedder_files = [f for f in listdir(embeddings_directory)]
 	embedder_file = choice(embedder_files)
 	print(embedd)
