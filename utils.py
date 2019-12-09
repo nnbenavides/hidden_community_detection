@@ -38,7 +38,7 @@ def loadGraphs():
 
 
 def louvain(G):
-    partition = community.best_partition(G)
+    partition = community.best_partition(G, randomize = True)
     return partition
 
 def modularity(partition,G):
